@@ -1,9 +1,9 @@
 def furniture_schema(furniture) -> dict:
-    return {"idMueble": str(furniture["idMueble"]),
-            "Habitacion_idHabitacion" : str(furniture["Habitacion_idHabitacion"]),
-            "estado": str(furniture["estado"]),
-            "imagen": str(furniture["imagen"]),
-            "descripcion": str(furniture["descripcion"])
+    return {"idMueble": str(furniture[0]),
+            "Habitacion_idHabitacion" : str(furniture[1]),
+            "estado": str(furniture[2]),
+            "imagen": str(furniture[3]),
+            "descripcion": str(furniture[4])
            }
 
 

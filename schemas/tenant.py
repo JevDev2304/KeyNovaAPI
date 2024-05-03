@@ -1,10 +1,10 @@
 
 def tenant_schema(tenant) -> dict:
-    return {"idArrendatario" : str(tenant["idArrendatario"]),
-            "nombre" : str(tenant["nombre"]),
-            "correo" : str(tenant["correo"]),
-            "edad" : str(tenant["edad"]),
-            "genero": str(tenant["genero"])
+    return {"idArrendatario" : str(tenant[0]),
+            "nombre" : str(tenant[1]),
+            "correo" : str(tenant[2]),
+            "edad" : str(tenant[3]),
+            "genero": str(tenant[4])
            }
 
 def tenants_schema(tenants) -> list:
