@@ -6,8 +6,8 @@ from routers.tenant import tenantRouter
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-IMAGEDIR= "static/images"
-VIDEODIR = "static/videos"
+IMAGEDIR= "static/images/"
+VIDEODIR = "static/videos/"
 
 app.include_router(ownerRouter)
 app.include_router(agentRouter)
@@ -22,6 +22,8 @@ def read_root():
 async def create_upload_img(file: UploadFile = File(...)):
     result = await upload_img(IMAGEDIR,file)
     return result
+
+
 @app.post("/uploadVideo/")
 async def create_upload_video(file: UploadFile = File(...)):
     result = await upload_video(VIDEODIR,file)
