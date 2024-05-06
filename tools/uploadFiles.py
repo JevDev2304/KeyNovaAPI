@@ -10,7 +10,6 @@ async def upload_video(VIDEODIR , file :UploadFile = File(...), ):
         raise HTTPException(status_code=400,
                             detail="invalid filetype . Please, upload a video filetype (.mp4)")
 
-        # save the file
     with open(f"{VIDEODIR}{file.filename}", "wb") as f:
         f.write(contents)
     return {"filename": file.filename}
@@ -23,9 +22,6 @@ async def upload_img(IMGDIR , file :UploadFile = File(...), ):
         raise HTTPException(status_code=400,
                             detail="invalid filetype . Please, upload an img filetype (.jpg, .jpeg or .png)")
 
-
-
-    # save the file
     with open(f"{IMGDIR}{file.filename}", "wb") as f:
         f.write(contents)
     return {"filename": file.filename}
