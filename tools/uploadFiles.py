@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 async def upload_video(VIDEODIR , file :UploadFile = File(...), ):
     if file.filename.endswith(".mp4"):
-        file.filename = f"{uuid.uuid4()}.jpg"
+        file.filename = f"{uuid.uuid4()}.mp4"
         contents = await file.read()
     else:
         raise HTTPException(status_code=400,
