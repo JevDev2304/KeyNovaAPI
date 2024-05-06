@@ -1,9 +1,10 @@
 
 def room_schema(room) -> dict:
     return {"idHabitacion" : str(room[0]),
-            "Propietario_cedula" : str(room[1]),
-            "direccion" : str(room[2]),
-            "tipo" : str(room[3]),
+            "Propiedad_idPropiedad" : str(room[1]),
+            "estado" : str(room[2]),
+            "video" : str(room[3]),
+            "nombre": str(room[4])
            }
 
 def rooms_schema(rooms) -> list:

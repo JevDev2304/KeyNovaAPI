@@ -3,7 +3,8 @@ def furniture_schema(furniture) -> dict:
             "Habitacion_idHabitacion" : str(furniture[1]),
             "estado": str(furniture[2]),
             "imagen": str(furniture[3]),
-            "descripcion": str(furniture[4])
+            "descripcion": str(furniture[4]),
+            "nombre": str(furniture[5])
            }
 
 

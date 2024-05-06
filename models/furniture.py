@@ -7,3 +7,4 @@ class Furniture (BaseModel):
     estado: int
     imagen: str
     descripcion: str
+    nombre : str

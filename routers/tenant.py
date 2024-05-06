@@ -17,51 +17,35 @@ async def tenants():
 @tenantRouter.get("/{mail}", response_model=Tenant)
 async def tenant(mail: str):
     tenant = dbConnection.obtener_arrendatario_por_correo(mail)
-    if type(tenant) == tuple:
-        tenant_dict = tenant_schema(tenant)
-        return JSONResponse(content=tenant_dict)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found with the given email address.")
+    tenant_dict = tenant_schema(tenant)
+    return JSONResponse(content=tenant_dict)
 
 @tenantRouter.post("/", status_code=status.HTTP_201_CREATED, response_model=Tenant)
-async def owner(tenant: Tenant):
-    tenants = tenants_schema(dbConnection.obtener_arrendatarios())
-    isRepeated = repeatedMail(tenant,tenants)
-    if isRepeated:
-        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="The tenant mail already exist")
-    else:
-        tenant_dict = dict(tenant)
-        del tenant_dict["idArrendatario"]
-        dbConnection.agregar_arrendatario(**tenant_dict)
-        tenant_dict = tenant_schema(dbConnection.obtener_arrendatario_por_correo(tenant.correo))
-        return JSONResponse(content=tenant_dict)
+async def tenant(tenant: Tenant):
+    tenant_dict = dict(tenant)
+    correctGenre(tenant_dict["genero"])
+    del tenant_dict["idArrendatario"]
+    dbConnection.agregar_arrendatario(**tenant_dict)
+    tenant_dict = tenant_schema(dbConnection.obtener_arrendatario_por_correo(tenant.correo))
+    return JSONResponse(content=tenant_dict)
 
 @tenantRouter.delete("/{mail}", status_code=status.HTTP_200_OK, response_model=Tenant)
 async def tenant(mail: str):
     tenant = dbConnection.obtener_arrendatario_por_correo(mail)
-    if type(tenant) == tuple:
-        tenant_dict = tenant_schema(tenant)
-        dbConnection.eliminar_arrendatario(tenant_dict["idArrendatario"])
-        return JSONResponse(content=tenant_dict)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found with the given email address.")
+    tenant_dict = tenant_schema(tenant)
+    dbConnection.eliminar_arrendatario(tenant_dict["idArrendatario"])
+    return JSONResponse(content=tenant_dict)
 
 @tenantRouter.post("/sendmail/{mail}", status_code=status.HTTP_200_OK)
 async def owner(email: Email, mail:str):
-    tenant = dbConnection.obtener_arrendatario_por_correo(mail)
-    if isinstance(tenant, tuple):
-        sendmail(mail, email.subject, email.body)
-        dictResponse = {"message": "Mail sent :) "}
-        return JSONResponse(content=dictResponse)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found with the given email address.")
+    dbConnection.obtener_arrendatario_por_correo(mail)
+    sendmail(mail, email.subject, email.body)
+    dictResponse = {"message": "Mail sent :) "}
+    return JSONResponse(content=dictResponse)
 
-def repeatedMail(tenant: Tenant, tenants: list[dict]) -> bool:
-    isRepeated: bool = False
-    for tenant_i in tenants:
-        if tenant_i["correo"] == tenant.correo:
-            isRepeated = True
-    if isRepeated:
-        return True
+def correctGenre(word: str):
+    word_lower = word.lower()
+    if word_lower == "masculino" or word_lower == "femenino" or word_lower == "otro":
+        return word_lower
     else:
-        return False
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="You can only post a tenant with those genres(masculino,femenino or otro)")

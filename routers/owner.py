@@ -17,51 +17,36 @@ async def owners():
 @ownerRouter.get("/{mail}", response_model=Owner)
 async def owner(mail: str):
     owner = dbConnection.obtener_propietario_por_correo(mail)
-    if type(owner) == tuple:
-        owner_dict = owner_schema(owner)
-        return JSONResponse(content=owner_dict)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner does not found")
+    owner_dict = owner_schema(owner)
+    return JSONResponse(content=owner_dict)
 
 @ownerRouter.post("/", status_code=status.HTTP_201_CREATED, response_model=Owner)
 async def owner(owner: Owner):
-    owners = owners_schema(dbConnection.obtener_propietarios())
-    isRepeated = repeatedMail(owner, owners)
-    if isRepeated:
-        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="The owner mail already exist")
-    else:
-        owner_dict = dict(owner)
-        del owner_dict["idPropietario"]
-        dbConnection.agregar_propietario(**owner_dict)
-        owner_dict = owner_schema(dbConnection.obtener_propietario_por_correo(owner.correo))
-        return JSONResponse(content=owner_dict)
+    owner_dict = dict(owner)
+    owner_dict["genero"] = correctGenre(owner_dict["genero"])
+    del owner_dict["idPropietario"]
+    dbConnection.agregar_propietario(**owner_dict)
+    owner_dict = owner_schema(dbConnection.obtener_propietario_por_correo(owner.correo))
+    return JSONResponse(content=owner_dict)
 
 @ownerRouter.delete("/{mail}", status_code=status.HTTP_200_OK, response_model=Owner)
 async def owner(mail: str):
     owner = dbConnection.obtener_propietario_por_correo(mail)
-    if type(owner) == tuple:
-        owner_dict = owner_schema(owner)
-        dbConnection.eliminar_propietario(owner_dict["idPropietario"])
-        return JSONResponse(content=owner_dict)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner does not found")
+    owner_dict = owner_schema(owner)
+    dbConnection.eliminar_propietario(owner_dict["idPropietario"])
+    return JSONResponse(content=owner_dict)
 
 @ownerRouter.post("/sendmail/{mail}", status_code=status.HTTP_200_OK)
 async def owner(email: Email, mail:str):
-    owner = dbConnection.obtener_propietario_por_correo(mail)
-    if isinstance(owner, tuple):
-        sendmail(mail, email.subject, email.body)
-        dictResponse = {"message": "Mail sent :) "}
-        return JSONResponse(content=dictResponse)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email does not found")
+    dbConnection.obtener_propietario_por_correo(mail)
+    sendmail(mail, email.subject, email.body)
+    dictResponse = {"message": "Mail sent :) "}
+    return JSONResponse(content=dictResponse)
 
-def repeatedMail(owner: Owner, owners: list[dict]) -> bool:
-    isRepeated: bool = False
-    for owner_i in owners:
-        if owner_i["correo"] == owner.correo:
-            isRepeated = True
-    if isRepeated:
-        return True
+
+def correctGenre(word: str):
+    word_lower = word.lower()
+    if word_lower == "masculino" or word_lower == "femenino" or word_lower == "otro":
+        return word_lower
     else:
-        return False
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="You can only post an owner with those genres(masculino,femenino or otro)")

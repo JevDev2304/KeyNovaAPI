@@ -1,7 +1,6 @@
 def access_schema(access) -> dict:
-    return {"idAccess": str(access["idAccess"]),
-            "Propiedad_idPropiedad": str(access["Propiedad_idPropiedad"]),
-            "Agente_idAgente": str(access["Agente_idAgente"])
+    return {"Propiedad_idPropiedad": str(access[0]),
+            "Agente_idAgente": str(access[1])
             }
 
 

@@ -7,3 +7,4 @@ class Owner (BaseModel):
     correo: str
     edad: int
     genero: str
+    contrasennia: str

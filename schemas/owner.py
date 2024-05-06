@@ -4,7 +4,8 @@ def owner_schema(owner) -> dict:
             "nombre" : str(owner[1]),
             "correo" : str(owner[2]),
             "edad" : str(owner[3]),
-            "genero": str(owner[4])
+            "genero": str(owner[4]),
+            "contrassenia": str(owner[5])
            }
 def owners_schema(owners) -> list:
     return [owner_schema(owner) for owner in owners]
