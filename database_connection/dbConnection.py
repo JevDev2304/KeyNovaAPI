@@ -89,7 +89,6 @@ class ConnectionDB:
         self.executeSQL(query, (id,))
 
     def agregar_propietario(self, nombre: str, correo: str, genero: str, contrasennia: str):
-        # Verificar si no existe un correo igual
         if self.existe_propietario_con_correo(correo):
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                                 detail="You cannot post an OWNER  with an existing email")
@@ -116,7 +115,7 @@ class ConnectionDB:
             return False
 
     def existe_propietario_con_id(self, id):
-        try: 
+        try:
             query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = %s;"
             owner = self.executeSQL(query, (id,))
             if len(owner) > 0:
@@ -177,13 +176,13 @@ class ConnectionDB:
         query = "DELETE FROM PROPIEDAD p WHERE p.idPropiedad = %s"
         self.executeSQL(query, (id,))
 
-    def agregar_propiedad(self, id_propietario: int, direccion: str, imagen: str):
-        if not self.existe_propietario_con_id(id_propietario):
+    def agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str):
+        if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
-            query = "INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`,`direccion`,`imagen`) " \
+            query = "INSERT INTO `keynova`.`propiedad` (`  `,`direccion`,`imagen`) " \
                     "VALUES (%s,%s,%s);"
-            variables = (int(id_propietario), direccion, imagen)
+            variables = (int(Propietario_idPropietario), direccion, imagen)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
             return self.executeSQL(query)[0]
