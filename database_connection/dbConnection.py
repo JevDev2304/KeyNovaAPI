@@ -180,7 +180,7 @@ class ConnectionDB:
         if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
-            query = "INSERT INTO `keynova`.`propiedad` (`  `,`direccion`,`imagen`) " \
+            query = "INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`,`direccion`,`imagen`) " \
                     "VALUES (%s,%s,%s);"
             variables = (int(Propietario_idPropietario), direccion, imagen)
             self.executeSQL(query, variables)
