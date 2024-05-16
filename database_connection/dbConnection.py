@@ -126,9 +126,14 @@ class ConnectionDB:
     # TODO: ACCESO
 
     def obtener_accesos_por_id(self, id_propiedad: int, id_agente: int):
-        query = "SELECT * FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
-        accesos = self.executeSQL(query, (id_propiedad, id_agente))
-        return accesos
+        if not self.existe_agente_con_id(id_agente):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+        elif not self.existe_propiedad_con_id(id_propiedad):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
+        else:
+            query = "SELECT * FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
+            accesos = self.executeSQL(query, (id_propiedad, id_agente))
+            return accesos
 
     def eliminar_acceso(self, id_propiedad: int, id_agente: int):
         if not self.existe_propiedad_con_id(id_propiedad):
@@ -140,11 +145,7 @@ class ConnectionDB:
             self.executeSQL(query, (id_propiedad, id_agente))
 
     def agregar_acceso(self, id_propiedad: int, id_agente: int):
-        if not self.existe_agente_con_id(id_agente):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
-        elif not self.existe_propiedad_con_id(id_propiedad):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
-        elif len(self.obtener_accesos_por_id(id_propiedad, id_agente)) > 0:
+        if len(self.obtener_accesos_por_id(id_propiedad, id_agente)) > 0:
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="Access already exist")
         else:
             query = "INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`,`Agente_idAgente`) " \
@@ -181,6 +182,8 @@ class ConnectionDB:
                     "VALUES (%s,%s,%s);"
             variables = (int(id_propietario), direccion, imagen)
             self.executeSQL(query, variables)
+            query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
+            variables
 
     # TODO:
     def agregar_propiedad_con_agente(self, id_agente: int, id_propietario: int, direccion: str, imagen: str):
@@ -317,3 +320,26 @@ class ConnectionDB:
             query = "SELECT * FROM MUEBLE m WHERE m.Habitacion_idHabitacion = %s;"
             mueble = self.executeSQL(query, (id_habitacion,))
             return mueble
+
+#AGENTE GENERAL
+#OTP PARA INVENTARIO  (OBLIGATORIO) (TODO)
+
+#ACTUALIZAR , HABITACION Y MUEBLES DE LAS PROPIEDADES QUE TIENE ACCESO  (LISTO EN BD)
+#OBTENER PROPIEDAD DE UN AGENTE, HABITACIONES Y MUEBLES (LISTO BD)
+
+#AGENTE COMERCIAL
+#CREAR PROPIEDADES DE UN AGENTE , HABITACION Y MUEBLES  (LISTO EN BD)
+#OBTENER AGENTES DE MANTENIMIENTO  (TODO)
+#CREAR ACCESOS PARA UN AGENTE DE MANTENIMIENTO (LISTO EN BD)
+#ELIMINAR ACCESO (LISTO EN BD)
+#OBTENER PROPIETARIOS DE LAS PROPIEDADES DE UN AGENTE ///////////(TODO)
+# OBTENER LAS PROPIEDADES DE UN PROPIETARIO ///////////////// (LISTO EN BD)
+#CREAR PROPIETARIO (LISTO EN BD)
+#MANDAR CORREO AL PROPIETARIO CON SU INVENTARIO (TODO)
+
+#CRD DE MANTENIMIENTO (TODO)
+#OBTENER TODOS LOS MANTENIMIENTO DE UNA PROPIEDAD (TODO)
+#OBTENER TODOS LOS MANTENIMIENTOS DE LAS PROPIEDADES DE UN AGENTE COMERCIAL(TODO)
+
+#AGENTE MANTENIMIENTO
+#MANDAR CORREO CADA VEZ QUE SE HACE UN MANTENIMIENTO (TODO)
