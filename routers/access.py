@@ -8,10 +8,6 @@ from fastapi.responses import JSONResponse
 dbConnection = ConnectionDB()
 accessRouter = APIRouter(prefix="/access", tags=["access"])
 
-@accessRouter.get("/", response_model=list[Access])
-async def accessses():
-    accessses = accesses_schema(dbConnection.obtener_accesos())
-    return JSONResponse(content=accessses)
 
 @accessRouter.get("/{Propiedad_idPropiedad}/{Agente_idAgente}", response_model=Access)
 async def access(Propiedad_idPropiedad : str, Agente_idAgente: str):

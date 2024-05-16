@@ -9,10 +9,7 @@ from fastapi.responses import JSONResponse
 dbConnection = ConnectionDB()
 ownerRouter = APIRouter(prefix="/owner", tags=["owner"])
 
-@ownerRouter.get("/", response_model=list[Owner])
-async def owners():
-     owners = owners_schema(dbConnection.obtener_propietarios())
-     return JSONResponse(content=owners)
+
 
 @ownerRouter.get("/{mail}", response_model=Owner)
 async def owner(mail: str):

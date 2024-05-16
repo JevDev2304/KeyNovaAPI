@@ -4,6 +4,6 @@ class Room(BaseModel):
     idHabitacion: int | None
     Propiedad_idPropiedad : int
     estado: str
-    video: str
+    imagen: str
     nombre: str
 
