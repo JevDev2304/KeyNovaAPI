@@ -36,18 +36,18 @@ class ConnectionDB:
             print("Error al conectar a la base de datos:", e)
 
     # TODO: AGENTE (Siempre están quemados)
-    def obtener_agente_por_id(self, id: int):
+    def obtener_agente_por_id(self, idAgente: int):
         query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
-        agent = self.executeSQL(query, (id,))
+        agent = self.executeSQL(query, (idAgente,))
         if len(agent) > 0:
             return agent[0]
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
 
-    def eliminar_agente(self, id: int):
-        self.obtener_agente_por_id(id)  # Para que salga la excepcion de ahi
+    def eliminar_agente(self, idAgente: int):
+        self.obtener_agente_por_id(idAgente)  # Para que salga la excepcion de ahi
         query = "DELETE FROM AGENTE WHERE idAgente = %s;"
-        self.executeSQL(query, (id,))
+        self.executeSQL(query, (idAgente,))
 
     def obtener_agente_por_correo(self, correo):
         query = "SELECT * FROM AGENTE a WHERE a.correo = %s;"
@@ -65,9 +65,9 @@ class ConnectionDB:
         else:
             return False
 
-    def existe_agente_con_id(self, id):
+    def existe_agente_con_id(self, idAgente):
         query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
-        owner = self.executeSQL(query, (id,))
+        owner = self.executeSQL(query, (idAgente,))
         if len(owner) > 0:
             return True
         else:
@@ -75,18 +75,18 @@ class ConnectionDB:
 
     # TODO: PROPIETARIO
 
-    def obtener_propietario_por_id(self, id: int):
+    def obtener_propietario_por_id(self, idPropietario: int):
         query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = %s;"
-        owner = self.executeSQL(query, (id,))
+        owner = self.executeSQL(query, (idPropietario,))
         if len(owner) > 0:
             return owner[0]
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email was not found")
 
-    def eliminar_propietario(self, id: int):
-        self.obtener_propietario_por_id(id)
+    def eliminar_propietario(self, idPropietario: int):
+        self.obtener_propietario_por_id(idPropietario)
         query = "DELETE FROM PROPIETARIO p WHERE p.idPropietario = %s"
-        self.executeSQL(query, (id,))
+        self.executeSQL(query, (idPropietario,))
 
     def agregar_propietario(self, nombre: str, correo: str, genero: str, contrasennia: str):
         if self.existe_propietario_con_correo(correo):
@@ -114,10 +114,10 @@ class ConnectionDB:
         else:
             return False
 
-    def existe_propietario_con_id(self, id):
+    def existe_propietario_con_id(self, idPropietario):
         try:
             query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = %s;"
-            owner = self.executeSQL(query, (id,))
+            owner = self.executeSQL(query, (idPropietario,))
             if len(owner) > 0:
                 return True
             else:
@@ -127,54 +127,54 @@ class ConnectionDB:
 
     # TODO: ACCESO
 
-    def obtener_accesos_por_id(self, id_propiedad: int, id_agente: int):
-        if not self.existe_agente_con_id(id_agente):
+    def obtener_accesos_por_id(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
+        if not self.existe_agente_con_id(Agente_idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
-        elif not self.existe_propiedad_con_id(id_propiedad):
+        elif not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
             query = "SELECT * FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
-            accesos = self.executeSQL(query, (id_propiedad, id_agente))
+            accesos = self.executeSQL(query, (Propiedad_idPropiedad, Agente_idAgente))
             return accesos
 
-    def eliminar_acceso(self, id_propiedad: int, id_agente: int):
-        if not self.existe_propiedad_con_id(id_propiedad):
+    def eliminar_acceso(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
+        if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
-        elif not self.existe_agente_con_id(id_agente):
+        elif not self.existe_agente_con_id(Agente_idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
             query = "DELETE FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
-            self.executeSQL(query, (id_propiedad, id_agente))
+            self.executeSQL(query, (Propiedad_idPropiedad, Agente_idAgente))
 
-    def agregar_acceso(self, id_propiedad: int, id_agente: int):
-        if len(self.obtener_accesos_por_id(id_propiedad, id_agente)) > 0:
+    def agregar_acceso(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
+        if len(self.obtener_accesos_por_id(Propiedad_idPropiedad, Agente_idAgente)) > 0:
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="Access already exist")
         else:
             query = "INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`,`Agente_idAgente`) " \
                     "VALUES (%s,%s);"
-            variables = (id_propiedad, id_agente)
+            variables = (Propiedad_idPropiedad, Agente_idAgente)
             self.executeSQL(query, variables)
 
     # TODO: PROPIEDAD
 
-    def obtener_propiedad_por_id(self, id: int):
+    def obtener_propiedad_por_id(self, idPropiedad: int):
         query = "SELECT * FROM PROPIEDAD p WHERE p.idPropiedad = %s;"
-        propiedad = self.executeSQL(query, (id,))
+        propiedad = self.executeSQL(query, (idPropiedad,))
         if len(propiedad) > 0:
             return propiedad[0]
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
 
-    def actualizar_propiedad(self, id_propiedad: int, id_propietario: int, direccion: str, imagen: str):
+    def actualizar_propiedad(self, idPropiedad: int, Propietario_idPropietario: int, direccion: str, imagen: str):
         query = ("UPDATE `keynova`.`propiedad` SET `Propietario_idPropietario` = %s,`direccion` = %s,"
                  "`imagen` = %sWHERE `idPropiedad` = %s;")
-        variables = (id_propietario, direccion, imagen, id_propiedad)
+        variables = (Propietario_idPropietario, direccion, imagen, idPropiedad)
         self.executeSQL(query, variables)
 
-    def eliminar_propiedad(self, id: int):
-        self.obtener_propiedad_por_id(id)
+    def eliminar_propiedad(self, idPropiedad: int):
+        self.obtener_propiedad_por_id(idPropiedad)
         query = "DELETE FROM PROPIEDAD p WHERE p.idPropiedad = %s"
-        self.executeSQL(query, (id,))
+        self.executeSQL(query, (idPropiedad,))
 
     def agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str):
         if not self.existe_propietario_con_id(Propietario_idPropietario):
@@ -187,88 +187,98 @@ class ConnectionDB:
             query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
             return self.executeSQL(query)[0]
 
-    def agregar_propiedad_con_agente(self, id_agente: int, id_propietario: int, direccion: str, imagen: str):
-        if not self.existe_propietario_con_id(id_propietario):
+    # FALTA
+    def agregar_propiedad_con_agente(self, id_agente: int, Propietario_idPropietario: int, direccion: str, imagen: str):
+        if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
             query = "INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`,`direccion`,`imagen`) " \
                     "VALUES (%s,%s,%s);"
-            variables = (int(id_propietario), direccion, imagen)
+            variables = (int(Propietario_idPropietario), direccion, imagen)
             self.executeSQL(query, variables)
 
-    # ADICIONALES PROPIEDAD
-
-    def obtener_propiedades_por_id_propietario(self, id_propietario):
-        if not self.existe_propietario_con_id(id_propietario):
+    def obtener_propiedades_por_id_propietario(self, Propietario_idPropietario):
+        if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
             query = "SELECT * FROM PROPIEDAD p WHERE p.Propietario_idPropietario = %s;"
-            propiedades = self.executeSQL(query, (id_propietario,))
+            propiedades = self.executeSQL(query, (Propietario_idPropietario,))
             return propiedades
 
-    def existe_propiedad_con_id(self, id):
+    def existe_propiedad_con_id(self, idPropiedad):
         query = "SELECT * FROM PROPIEDAD p WHERE p.idPropiedad = %s;"
-        propiedad = self.executeSQL(query, (id,))
+        propiedad = self.executeSQL(query, (idPropiedad,))
         if len(propiedad) > 0:
             return True
         else:
             return False
 
-    def obtener_propiedades_por_id_agente(self, id_agente):
-        if not self.existe_agente_con_id(id_agente):
+    def obtener_propiedades_por_id_agente(self, idAgente):
+        if not self.existe_agente_con_id(idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
-            query = "select idPropiedad,Propietario_idPropietario, direccion, p.imagen from propiedad p join (select * from agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg on p.idPropiedad = acg.Propiedad_idPropiedad;"
-            variables = (id_agente,)
+            query = ("select idPropiedad,Propietario_idPropietario, direccion, p.imagen from propiedad p join (select "
+                     "* from agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg "
+                     "on p.idPropiedad = acg.Propiedad_idPropiedad;")
+            variables = (idAgente,)
             properties = self.executeSQL(query, variables)
             return properties
 
+    def obtener_propietarios_por_id_agente(self, idAgente):
+        if not self.existe_agente_con_id(idAgente):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+        else:
+            query = ("select distinct pr.idPropietario, pr.nombre, pr.correo, pr.genero, pr.contrasennia from "
+                     "propietario pr join (select Propietario_idPropietario from propiedad p join (select * from "
+                     "agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg on "
+                     "p.idPropiedad = acg.Propiedad_idPropiedad) aca on pr.idPropietario = "
+                     "aca.Propietario_idPropietario;")
+            variables = (idAgente,)
+            return self.executeSQL(query, variables)
+
     # TODO: HABITACION
 
-    def obtener_habitacion_por_id(self, id: int):
+    def obtener_habitacion_por_id(self, idHabitacion: int):
         query = "SELECT * FROM HABITACION h WHERE h.idHabitacion = %s;"
-        habitacion = self.executeSQL(query, (id,))
+        habitacion = self.executeSQL(query, (idHabitacion,))
         if len(habitacion) > 0:
             return habitacion[0]
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
 
-    # Aquí como que sobra id_propiedad, pero no se si te daña el modelo de la api
-    def actualizar_habitacion(self, id_habitacion: int, estado: str, imagen: str, nombre: str):
+    def actualizar_habitacion(self, idHabitacion: int, estado: str, imagen: str, nombre: str):
         query = ("UPDATE `keynova`.`habitacion` SET `estado` = %s,`imagen` = %s,"
                  "`nombre` = %s WHERE `idHabitacion` = %s;")
-        variables = (estado, imagen, nombre, id_habitacion)
+        variables = (estado, imagen, nombre, idHabitacion)
         self.executeSQL(query, variables)
 
-    def eliminar_habitacion(self, id: int):
-        self.obtener_habitacion_por_id(id)
+    def eliminar_habitacion(self, idHabitacion: int):
+        self.obtener_habitacion_por_id(idHabitacion)
         query = "DELETE FROM HABITACION h WHERE h.idHabitacion = %s"
-        self.executeSQL(query, (id,))
+        self.executeSQL(query, (idHabitacion,))
 
-    def agregar_habitacion(self, id_propiedad: int, estado: str, imagen: str, nombre: str):
-        if not self.existe_propiedad_con_id(id_propiedad):
+    def agregar_habitacion(self, Propiedad_idPropiedad: int, estado: str, imagen: str, nombre: str):
+        if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
             query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`estado`,`imagen`,`nombre`) " \
                     "VALUES (%s,%s,%s,%s);"
-            variables = (int(id_propiedad), estado, imagen, nombre)
+            variables = (int(Propiedad_idPropiedad), estado, imagen, nombre)
             self.executeSQL(query, variables)
             query = "SELECT * FROM habitacion ORDER BY idHabitacion DESC LIMIT 1;"
             return self.executeSQL(query)[0]
 
-    # ADICIONALES HABITACIÓN
-
-    def obtener_habitaciones_por_id_propiedad(self, id_propiedad):
-        if not self.existe_propiedad_con_id(id_propiedad):
+    def obtener_habitaciones_por_id_propiedad(self, idPropiedad):
+        if not self.existe_propiedad_con_id(idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
             query = "SELECT * FROM HABITACION h WHERE h.Propiedad_idPropiedad = %s;"
-            habitaciones = self.executeSQL(query, (id_propiedad,))
+            habitaciones = self.executeSQL(query, (idPropiedad,))
             return habitaciones
 
-    def existe_habitacion_con_id(self, id):
+    def existe_habitacion_con_id(self, idHabitacion):
         query = "SELECT * FROM HABITACION h WHERE h.idHabitacion = %s;"
-        room = self.executeSQL(query, (id,))
+        room = self.executeSQL(query, (idHabitacion,))
         if len(room) > 0:
             return True
         else:
@@ -276,53 +286,53 @@ class ConnectionDB:
 
     # TODO: MUEBLE
 
-    def obtener_mueble_por_id(self, id: int):
+    def obtener_mueble_por_id(self, idMueble: int):
         if not self.existe_mueble_con_id(id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Furniture with this id was not found")
         else:
             query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
-            mueble = self.executeSQL(query, (id,))
+            mueble = self.executeSQL(query, (idMueble,))
             return mueble
 
-    def existe_mueble_con_id(self, id):
+    def existe_mueble_con_id(self, idMueble):
         query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
-        mueble = self.executeSQL(query, (id,))
+        mueble = self.executeSQL(query, (idMueble,))
         if len(mueble) > 0:
             return True
         else:
             return False
 
-    def actualizar_mueble(self, id_mueble: int, estado: str, imagen: str, descripcion: str,
+    def actualizar_mueble(self, idMueble: int, estado: str, imagen: str, descripcion: str,
                           nombre: str):
         query = ("UPDATE `keynova`.`mueble` SET `estado` = %s, `imagen` = %s, "
                  "`descripcion` = %s, `nombre` = %s WHERE `idMueble` = %s;")
-        variables = ( estado, imagen, descripcion, nombre, id_mueble)
+        variables = ( estado, imagen, descripcion, nombre, idMueble)
         self.executeSQL(query, variables)
 
-    def eliminar_mueble(self, id: int):
-        self.obtener_mueble_por_id(id)
+    def eliminar_mueble(self, idMueble: int):
+        self.obtener_mueble_por_id(idMueble)
         query = "DELETE FROM MUEBLE m WHERE m.idMueble = %s"
-        self.executeSQL(query, (id,))
+        self.executeSQL(query, (idMueble,))
 
-    def agregar_mueble(self, id_habitacion: int, estado: str, imagen: str, descripcion: str, nombre: str):
-        if not self.existe_habitacion_con_id(id_habitacion):
+    def agregar_mueble(self, Habitacion_idHabitacion: int, estado: str, imagen: str, descripcion: str, nombre: str):
+        if not self.existe_habitacion_con_id(Habitacion_idHabitacion):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
         else:
             query = "INSERT INTO `keynova`.`habitacion` (`Habitacion_idHabitacion`,`estado`,`imagen`,`descripcion`,`nombre`) " \
                     "VALUES (%s,%s,%s,%s,%s);"
-            variables = (int(id_habitacion), estado, imagen, descripcion, nombre)
+            variables = (int(Habitacion_idHabitacion), estado, imagen, descripcion, nombre)
             self.executeSQL(query, variables)
             query = "SELECT * FROM mueble ORDER BY idMueble DESC LIMIT 1;"
             return self.executeSQL(query)[0]
 
     # ADICIONALES MUEBLE
 
-    def obtener_muebles_por_id_habitacion(self, id_habitacion):
-        if not self.existe_habitacion_con_id(id_habitacion):
+    def obtener_muebles_por_id_habitacion(self, Habitacion_idHabitacion):
+        if not self.existe_habitacion_con_id(Habitacion_idHabitacion):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
         else:
             query = "SELECT * FROM MUEBLE m WHERE m.Habitacion_idHabitacion = %s;"
-            mueble = self.executeSQL(query, (id_habitacion,))
+            mueble = self.executeSQL(query, (Habitacion_idHabitacion,))
             return mueble
 
 #AGENTE GENERAL
