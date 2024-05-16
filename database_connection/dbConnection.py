@@ -116,11 +116,14 @@ class ConnectionDB:
             return False
 
     def existe_propietario_con_id(self, id):
-        query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = %s;"
-        owner = self.executeSQL(query, (id,))
-        if len(owner) > 0:
-            return True
-        else:
+        try: 
+            query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = %s;"
+            owner = self.executeSQL(query, (id,))
+            if len(owner) > 0:
+                return True
+            else:
+                return False
+        except Exception as e:
             return False
 
     # TODO: ACCESO
@@ -183,7 +186,7 @@ class ConnectionDB:
             variables = (int(id_propietario), direccion, imagen)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
-            return self.executeSQL(query)
+            return self.executeSQL(query)[0]
 
     def agregar_propiedad_con_agente(self, id_agente: int, id_propietario: int, direccion: str, imagen: str):
         if not self.existe_propietario_con_id(id_propietario):
@@ -251,6 +254,8 @@ class ConnectionDB:
                     "VALUES (%s,%s,%s,%s);"
             variables = (int(id_propiedad), estado, imagen, nombre)
             self.executeSQL(query, variables)
+            query = "SELECT * FROM habitacion ORDER BY idHabitacion DESC LIMIT 1;"
+            return self.executeSQL(query)[0]
 
     # ADICIONALES HABITACIÓN
 
@@ -308,6 +313,8 @@ class ConnectionDB:
                     "VALUES (%s,%s,%s,%s,%s);"
             variables = (int(id_habitacion), estado, imagen, descripcion, nombre)
             self.executeSQL(query, variables)
+            query = "SELECT * FROM mueble ORDER BY idMueble DESC LIMIT 1;"
+            return self.executeSQL(query)[0]
 
     # ADICIONALES MUEBLE
 
