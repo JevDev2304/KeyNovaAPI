@@ -183,9 +183,8 @@ class ConnectionDB:
             variables = (int(id_propietario), direccion, imagen)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
-            variables
+            return self.executeSQL(query)
 
-    # TODO:
     def agregar_propiedad_con_agente(self, id_agente: int, id_propietario: int, direccion: str, imagen: str):
         if not self.existe_propietario_con_id(id_propietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
@@ -221,7 +220,6 @@ class ConnectionDB:
             variables = (id_agente,)
             properties = self.executeSQL(query, variables)
             return properties
-
 
     # TODO: HABITACION
 
