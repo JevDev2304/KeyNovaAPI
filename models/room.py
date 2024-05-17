@@ -5,4 +5,5 @@ class Room(BaseModel):
     Propiedad_idPropiedad : int
     imagen: str
     nombre: str
+    descripcion: str | None
 

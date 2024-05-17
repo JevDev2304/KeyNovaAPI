@@ -331,24 +331,27 @@ class ConnectionDB:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
 
-    def actualizar_habitacion(self, idHabitacion: int, estado: str, imagen: str, nombre: str):
-        query = ("UPDATE `keynova`.`habitacion` SET `estado` = %s,`imagen` = %s,"
-                 "`nombre` = %s WHERE `idHabitacion` = %s;")
-        variables = (estado, imagen, nombre, idHabitacion)
+    def actualizar_habitacion(self, idHabitacion: int, imagen: str, nombre: str, descripcion):
+        query = ("UPDATE `keynova`.`habitacion` SET `imagen` = %s,"
+                 "`nombre` = %s, `descripcion` = %s WHERE `idHabitacion` = %s;")
+        variables = ( imagen, nombre, descripcion, idHabitacion)
         self.executeSQL(query, variables)
 
     def eliminar_habitacion(self, idHabitacion: int):
-        self.obtener_habitacion_por_id(idHabitacion)
+        habitacion =(self.obtener_habitacion_por_id(idHabitacion))
         query = "DELETE FROM HABITACION h WHERE h.idHabitacion = %s"
         self.executeSQL(query, (idHabitacion,))
+        return habitacion
 
-    def agregar_habitacion(self, Propiedad_idPropiedad: int, imagen: str, nombre: str):
+    def agregar_habitacion(self, Propiedad_idPropiedad: int, imagen: str, nombre: str, descripcion):
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
-            query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`imagen`,`nombre`) " \
-                    "VALUES (%s,%s,%s);"
-            variables = (int(Propiedad_idPropiedad), imagen, nombre)
+            query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`imagen`,`nombre`, `descripcion`) " \
+                    "VALUES (%s,%s,%s, %s);"
+            if descripcion is None:
+                descripcion = "None"
+            variables = (int(Propiedad_idPropiedad), imagen, nombre, descripcion)
             self.executeSQL(query, variables)
             query = "SELECT * FROM habitacion ORDER BY idHabitacion DESC LIMIT 1;"
             return self.executeSQL(query)[0]
@@ -375,17 +378,18 @@ class ConnectionDB:
     # TODO: MUEBLE
 
     def obtener_mueble_por_id(self, idMueble: int):
-        if not self.existe_mueble_con_id(id):
+        if not self.existe_mueble_con_id(idMueble):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Furniture with this id was not found")
         else:
             query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
             mueble = self.executeSQL(query, (idMueble,))
-            return mueble
+            return mueble[0]
 
     def existe_mueble_con_id(self, idMueble):
         try:
             query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
             mueble = self.executeSQL(query, (idMueble,))
+            print(mueble)
             if len(mueble) > 0:
                 return True
             else:
@@ -401,15 +405,16 @@ class ConnectionDB:
         self.executeSQL(query, variables)
 
     def eliminar_mueble(self, idMueble: int):
-        self.obtener_mueble_por_id(idMueble)
+        mueble = self.obtener_mueble_por_id(idMueble)
         query = "DELETE FROM MUEBLE m WHERE m.idMueble = %s"
         self.executeSQL(query, (idMueble,))
+        return mueble
 
     def agregar_mueble(self, Habitacion_idHabitacion: int, estado: str, imagen: str, descripcion: str, nombre: str):
         if not self.existe_habitacion_con_id(Habitacion_idHabitacion):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
         else:
-            query = "INSERT INTO `keynova`.`habitacion` (`Habitacion_idHabitacion`,`estado`,`imagen`,`descripcion`,`nombre`) " \
+            query = "INSERT INTO `keynova`.`mueble` (`Habitacion_idHabitacion`,`estado`,`imagen`,`descripcion`,`nombre`) " \
                     "VALUES (%s,%s,%s,%s,%s);"
             variables = (int(Habitacion_idHabitacion), estado, imagen, descripcion, nombre)
             self.executeSQL(query, variables)
