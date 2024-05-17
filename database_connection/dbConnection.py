@@ -1,3 +1,5 @@
+import random
+
 from fastapi import HTTPException, status
 import mysql.connector
 
@@ -44,6 +46,10 @@ class ConnectionDB:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
 
+    def obtener_agentes_mantenimiento(self):
+        query = "SELECT * FROM AGENTE WHERE tipo = 'mantenimiento'"
+        return self.executeSQL(query)
+
     def eliminar_agente(self, idAgente: int):
         self.obtener_agente_por_id(idAgente)  # Para que salga la excepcion de ahi
         query = "DELETE FROM AGENTE WHERE idAgente = %s;"
@@ -65,13 +71,19 @@ class ConnectionDB:
         else:
             return False
 
-    def existe_agente_con_id(self, idAgente):
+    def existe_agente_con_id(self, idAgente: int):
         query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
         owner = self.executeSQL(query, (idAgente,))
         if len(owner) > 0:
             return True
         else:
             return False
+
+    def crear_clave_temporal(self, idAgente: int):
+        query = "UPDATE `keynova`.`agente` SET `clave_temporal` = %s WHERE `idAgente` = %s;"
+        num_aleatorio = random.randint(100000, 999999)
+        self.executeSQL(query, (num_aleatorio, idAgente))
+        return num_aleatorio
 
     # TODO: PROPIETARIO
 
@@ -334,6 +346,58 @@ class ConnectionDB:
             query = "SELECT * FROM MUEBLE m WHERE m.Habitacion_idHabitacion = %s;"
             mueble = self.executeSQL(query, (Habitacion_idHabitacion,))
             return mueble
+
+    # TODO: MANTENIMIENTO
+
+    def agregar_mantenimiento(self, Propiedad_idPropiedad: int, descripcion: str, fecha: str, Agente_idAgente: int):
+        query = ("INSERT INTO `keynova`.`mantenimiento` (`Propiedad_idPropiedad`,`descripcion`,`fecha`,"
+                 "`Agente_idAgente`) VALUES (%s,%s,%s,%s);")
+        variables = (int(Propiedad_idPropiedad), descripcion, fecha, int(Agente_idAgente))
+        self.executeSQL(query, variables)
+        query = "SELECT * FROM mantenimiento ORDER BY idMantenimiento DESC LIMIT 1;"
+        return self.executeSQL(query)[0]
+
+    def obtener_mantenimientos_por_id_propiedad(self, Propiedad_idPropiedad):
+        if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+        else:
+            query = "SELECT * FROM MANTENIMIENTO m WHERE m.Propiedad_idPropiedad = %s;"
+            mantenimientos = self.executeSQL(query, (Propiedad_idPropiedad,))
+            return mantenimientos
+
+    def obtener_mantenimientos_por_id_agente(self, Agente_idAgente):
+        if not self.existe_agente_con_id(Agente_idAgente):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+        else:
+            query = ("select idMantenimiento,Propiedad_idPropiedad,descripcion,fecha,Agente_idAgente from "
+                     "mantenimiento m join (select idPropiedad from propiedad p join (select * from agente ag "
+                     "JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg "
+                     "on p.idPropiedad = acg.Propiedad_idPropiedad) aca on m.Propiedad_idPropiedad = aca.idPropiedad")
+            mantenimientos = self.executeSQL(query, (Agente_idAgente,))
+            return mantenimientos
+
+    def eliminar_mantenimiento(self, idMantenimiento: int):
+        self.obtener_mantenimiento_por_id(idMantenimiento)
+        query = "DELETE FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s"
+        self.executeSQL(query, (idMantenimiento,))
+
+    def obtener_mantenimiento_por_id(self, idMantenimiento: int):
+        if not self.existe_mantenimiento_con_id(idMantenimiento):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+        else:
+            query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
+            mantenimiento = self.executeSQL(query, (idMantenimiento,))
+
+    def existe_mantenimiento_con_id(self, idMantenimiento):
+        query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
+        mantenimiento = self.executeSQL(query, (idMantenimiento,))
+        if len(mantenimiento) > 0:
+            return True
+        else:
+            return False
+
+c=ConnectionDB()
+print(c.obtener_propietarios_por_id_agente(0))
 
 #AGENTE GENERAL
 #OTP PARA INVENTARIO  (OBLIGATORIO) (TODO)
