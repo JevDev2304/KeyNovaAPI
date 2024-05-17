@@ -64,19 +64,25 @@ class ConnectionDB:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this email was not found")
 
     def existe_agente_con_correo(self, correo):
-        query = "SELECT * FROM AGENTE a WHERE a.correo = %s;"
-        owner = self.executeSQL(query, (correo,))
-        if len(owner) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM AGENTE a WHERE a.correo = %s;"
+            owner = self.executeSQL(query, (correo,))
+            if len(owner) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def existe_agente_con_id(self, idAgente: int):
-        query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
-        owner = self.executeSQL(query, (idAgente,))
-        if len(owner) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
+            owner = self.executeSQL(query, (idAgente,))
+            if len(owner) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def crear_clave_temporal(self, idAgente: int):
@@ -119,11 +125,14 @@ class ConnectionDB:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email was not found")
 
     def existe_propietario_con_correo(self, correo):
-        query = "SELECT * FROM PROPIETARIO p WHERE p.correo = %s;"
-        owner = self.executeSQL(query, (correo,))
-        if len(owner) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM PROPIETARIO p WHERE p.correo = %s;"
+            owner = self.executeSQL(query, (correo,))
+            if len(owner) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def existe_propietario_con_id(self, idPropietario):
@@ -218,11 +227,14 @@ class ConnectionDB:
             return propiedades
 
     def existe_propiedad_con_id(self, idPropiedad):
-        query = "SELECT * FROM PROPIEDAD p WHERE p.idPropiedad = %s;"
-        propiedad = self.executeSQL(query, (idPropiedad,))
-        if len(propiedad) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM PROPIEDAD p WHERE p.idPropiedad = %s;"
+            propiedad = self.executeSQL(query, (idPropiedad,))
+            if len(propiedad) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def obtener_propiedades_por_id_agente(self, idAgente):
@@ -289,11 +301,14 @@ class ConnectionDB:
             return habitaciones
 
     def existe_habitacion_con_id(self, idHabitacion):
-        query = "SELECT * FROM HABITACION h WHERE h.idHabitacion = %s;"
-        room = self.executeSQL(query, (idHabitacion,))
-        if len(room) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM HABITACION h WHERE h.idHabitacion = %s;"
+            room = self.executeSQL(query, (idHabitacion,))
+            if len(room) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     # TODO: MUEBLE
@@ -307,11 +322,14 @@ class ConnectionDB:
             return mueble
 
     def existe_mueble_con_id(self, idMueble):
-        query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
-        mueble = self.executeSQL(query, (idMueble,))
-        if len(mueble) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
+            mueble = self.executeSQL(query, (idMueble,))
+            if len(mueble) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
     def actualizar_mueble(self, idMueble: int, estado: str, imagen: str, descripcion: str,
@@ -359,7 +377,7 @@ class ConnectionDB:
 
     def obtener_mantenimientos_por_id_propiedad(self, Propiedad_idPropiedad):
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
             query = "SELECT * FROM MANTENIMIENTO m WHERE m.Propiedad_idPropiedad = %s;"
             mantenimientos = self.executeSQL(query, (Propiedad_idPropiedad,))
@@ -389,35 +407,25 @@ class ConnectionDB:
             mantenimiento = self.executeSQL(query, (idMantenimiento,))
 
     def existe_mantenimiento_con_id(self, idMantenimiento):
-        query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
-        mantenimiento = self.executeSQL(query, (idMantenimiento,))
-        if len(mantenimiento) > 0:
-            return True
-        else:
+        try:
+            query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
+            mantenimiento = self.executeSQL(query, (idMantenimiento,))
+            if len(mantenimiento) > 0:
+                return True
+            else:
+                return False
+        except Exception:
             return False
 
+    # TODO: INVENTARIO
+
+    def obtener_inventario_por_id_propiedad(self, Propiedad_idPropiedad):
+        if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
+        else:
+            query = ""
+            inventario = self.executeSQL(query, (Propiedad_idPropiedad,))
+            return inventario
+        
+        
 c=ConnectionDB()
-print(c.obtener_propietarios_por_id_agente(0))
-
-#AGENTE GENERAL
-#OTP PARA INVENTARIO  (OBLIGATORIO) (TODO)
-
-#ACTUALIZAR , HABITACION Y MUEBLES DE LAS PROPIEDADES QUE TIENE ACCESO  (LISTO EN BD)
-#OBTENER PROPIEDAD DE UN AGENTE, HABITACIONES Y MUEBLES (LISTO BD)
-
-#AGENTE COMERCIAL
-#CREAR PROPIEDADES DE UN AGENTE , HABITACION Y MUEBLES  (LISTO EN BD)
-#OBTENER AGENTES DE MANTENIMIENTO  (TODO)
-#CREAR ACCESOS PARA UN AGENTE DE MANTENIMIENTO (LISTO EN BD)
-#ELIMINAR ACCESO (LISTO EN BD)
-#OBTENER PROPIETARIOS DE LAS PROPIEDADES DE UN AGENTE ///////////(TODO)
-# OBTENER LAS PROPIEDADES DE UN PROPIETARIO ///////////////// (LISTO EN BD)
-#CREAR PROPIETARIO (LISTO EN BD)
-#MANDAR CORREO AL PROPIETARIO CON SU INVENTARIO (TODO)
-
-#CRD DE MANTENIMIENTO (TODO)
-#OBTENER TODOS LOS MANTENIMIENTO DE UNA PROPIEDAD (TODO)
-#OBTENER TODOS LOS MANTENIMIENTOS DE LAS PROPIEDADES DE UN AGENTE COMERCIAL(TODO)
-
-#AGENTE MANTENIMIENTO
-#MANDAR CORREO CADA VEZ QUE SE HACE UN MANTENIMIENTO (TODO)
