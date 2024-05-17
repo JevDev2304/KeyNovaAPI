@@ -334,11 +334,11 @@ class ConnectionDB:
     def actualizar_habitacion(self, idHabitacion: int, imagen: str, nombre: str, descripcion):
         query = ("UPDATE `keynova`.`habitacion` SET `imagen` = %s,"
                  "`nombre` = %s, `descripcion` = %s WHERE `idHabitacion` = %s;")
-        variables = ( imagen, nombre, descripcion, idHabitacion)
+        variables = (imagen, nombre, descripcion, idHabitacion)
         self.executeSQL(query, variables)
 
     def eliminar_habitacion(self, idHabitacion: int):
-        habitacion =(self.obtener_habitacion_por_id(idHabitacion))
+        habitacion = (self.obtener_habitacion_por_id(idHabitacion))
         query = "DELETE FROM HABITACION h WHERE h.idHabitacion = %s"
         self.executeSQL(query, (idHabitacion,))
         return habitacion
@@ -348,7 +348,7 @@ class ConnectionDB:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
             query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`imagen`,`nombre`, `descripcion`) " \
-                    "VALUES (%s,%s,%s, %s);"
+                    "VALUES (%s,%s,%s,%s);"
             if descripcion is None:
                 descripcion = "None"
             variables = (int(Propiedad_idPropiedad), imagen, nombre, descripcion)
@@ -401,7 +401,7 @@ class ConnectionDB:
                           nombre: str):
         query = ("UPDATE `keynova`.`mueble` SET `estado` = %s, `imagen` = %s, "
                  "`descripcion` = %s, `nombre` = %s WHERE `idMueble` = %s;")
-        variables = ( estado, imagen, descripcion, nombre, idMueble)
+        variables = (estado, imagen, descripcion, nombre, idMueble)
         self.executeSQL(query, variables)
 
     def eliminar_mueble(self, idMueble: int):
@@ -449,7 +449,7 @@ class ConnectionDB:
             mantenimientos = self.executeSQL(query, (Propiedad_idPropiedad,))
             return mantenimientos
 
-    def obtener_mantenimientos_por_id_agente(self, Agente_idAgente):
+    def obtener_mantenimientos_por_id_agente_comercial(self, Agente_idAgente):
         if not self.existe_agente_con_id(Agente_idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
@@ -459,6 +459,13 @@ class ConnectionDB:
                      "on p.idPropiedad = acg.Propiedad_idPropiedad) aca on m.Propiedad_idPropiedad = aca.idPropiedad")
             mantenimientos = self.executeSQL(query, (Agente_idAgente,))
             return mantenimientos
+
+    def obtener_mantenimientos_por_id_agente_mantenimiento(self, Agente_idAgente):
+        if not self.existe_agente_con_id(Agente_idAgente):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+        else:
+            query = ("select m.idMantenimiento, m.Propiedad_idPropiedad, m.descripcion, m.fecha, m.Agente_idAgente "
+                     "from agente a join mantenimiento m on a.idAgente = m.Agente_idAgente;")
 
     def eliminar_mantenimiento(self, idMantenimiento: int):
         self.obtener_mantenimiento_por_id(idMantenimiento)
@@ -489,9 +496,26 @@ class ConnectionDB:
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
-            query = ""
-            inventario = self.executeSQL(query, (Propiedad_idPropiedad,))
+            propiedad = self.obtener_propiedad_por_id(Propiedad_idPropiedad)
+            inventario = {"direccion": propiedad[2],
+                          "imagen": propiedad[3],
+                          "habitaciones": []}
+            habitaciones = self.obtener_habitaciones_por_id_propiedad(Propiedad_idPropiedad)
+            for habitacion in habitaciones:
+                idHabitacion = habitacion[0]
+                habitacion = {"imagen": habitacion[2],
+                              "nombre": habitacion[3],
+                              "descripcion": habitacion[4],
+                              "muebles": []}
+                muebles = self.obtener_muebles_por_id_habitacion(idHabitacion)
+                for mueble in muebles:
+                    mueble = {"estado": mueble[2],
+                              "imagen": mueble[3],
+                              "descripcion": mueble[4],
+                              "nombre": mueble[5]}
+                    habitacion["muebles"].append(mueble)
+                inventario["habitaciones"].append(habitacion)
             return inventario
 
 
-c=ConnectionDB()
+c = ConnectionDB()
