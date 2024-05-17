@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException
 from starlette.responses import JSONResponse
 from database_connection.dbConnection import ConnectionDB
 from models.agent import Agent
-from schemas.agent import agent_schema,agents_schema
+from schemas.agent import agent_schema
 
 dbConnection = ConnectionDB()
 agentRouter = APIRouter(prefix="/agent", tags=["agent"])

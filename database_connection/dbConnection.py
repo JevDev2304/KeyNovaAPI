@@ -296,13 +296,13 @@ class ConnectionDB:
         query = "DELETE FROM HABITACION h WHERE h.idHabitacion = %s"
         self.executeSQL(query, (idHabitacion,))
 
-    def agregar_habitacion(self, Propiedad_idPropiedad: int, estado: str, imagen: str, nombre: str):
+    def agregar_habitacion(self, Propiedad_idPropiedad: int, imagen: str, nombre: str):
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
-            query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`estado`,`imagen`,`nombre`) " \
-                    "VALUES (%s,%s,%s,%s);"
-            variables = (int(Propiedad_idPropiedad), estado, imagen, nombre)
+            query = "INSERT INTO `keynova`.`habitacion` (`Propiedad_idPropiedad`,`imagen`,`nombre`) " \
+                    "VALUES (%s,%s,%s);"
+            variables = (int(Propiedad_idPropiedad), imagen, nombre)
             self.executeSQL(query, variables)
             query = "SELECT * FROM habitacion ORDER BY idHabitacion DESC LIMIT 1;"
             return self.executeSQL(query)[0]
