@@ -8,4 +8,5 @@ class Agent (BaseModel):
     correo: str
     contrasennia: int
     imagen : str
+    clave_temporal : int | None
 

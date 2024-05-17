@@ -127,7 +127,7 @@ class ConnectionDB:
 
     # TODO: ACCESO
 
-    def obtener_accesos_por_id(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
+    def obtener_acceso_por_id(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
         if not self.existe_agente_con_id(Agente_idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         elif not self.existe_propiedad_con_id(Propiedad_idPropiedad):
@@ -135,7 +135,11 @@ class ConnectionDB:
         else:
             query = "SELECT * FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
             accesos = self.executeSQL(query, (Propiedad_idPropiedad, Agente_idAgente))
-            return accesos
+            if len(accesos) >  0:
+                return accesos[0]
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Access with those ids were not found")
+
 
     def eliminar_acceso(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
@@ -147,14 +151,24 @@ class ConnectionDB:
             self.executeSQL(query, (Propiedad_idPropiedad, Agente_idAgente))
 
     def agregar_acceso(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
-        if len(self.obtener_accesos_por_id(Propiedad_idPropiedad, Agente_idAgente)) > 0:
+        if self.existe_acceso(Propiedad_idPropiedad, Agente_idAgente):
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="Access already exist")
         else:
             query = "INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`,`Agente_idAgente`) " \
                     "VALUES (%s,%s);"
             variables = (Propiedad_idPropiedad, Agente_idAgente)
             self.executeSQL(query, variables)
-
+    def existe_acceso(self, Propiedad_idPropiedad: int, Agente_idAgente: int):
+        if not self.existe_agente_con_id(Agente_idAgente):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+        elif not self.existe_propiedad_con_id(Propiedad_idPropiedad):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
+        query = "SELECT * FROM ACCESO a WHERE a.Propiedad_idPropiedad = %s AND a.Agente_idAgente = %s;"
+        accesos = self.executeSQL(query, (Propiedad_idPropiedad, Agente_idAgente))
+        if len(accesos) > 0:
+            return True
+        else:
+            return False
     # TODO: PROPIEDAD
 
     def obtener_propiedad_por_id(self, idPropiedad: int):
@@ -228,6 +242,7 @@ class ConnectionDB:
         if not self.existe_agente_con_id(idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
+            print("HOLA")
             query = ("select distinct pr.idPropietario, pr.nombre, pr.correo, pr.genero, pr.contrasennia from "
                      "propietario pr join (select Propietario_idPropietario from propiedad p join (select * from "
                      "agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg on "

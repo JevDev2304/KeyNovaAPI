@@ -17,6 +17,12 @@ async def owner(mail: str):
     owner_dict = owner_schema(owner)
     return JSONResponse(content=owner_dict)
 
+@ownerRouter.get("/owners_of_agent/{id}", response_model=list[Owner])
+async def owners_of_agent(id: str):
+    owners = dbConnection.obtener_propietarios_por_id_agente(int(id))
+    owners_list = owners_schema(owners)
+    return JSONResponse(content=owners_list)
+
 @ownerRouter.post("/", status_code=status.HTTP_201_CREATED, response_model=Owner)
 async def owner(owner: Owner):
     owner_dict = dict(owner)

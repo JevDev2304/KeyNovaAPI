@@ -7,10 +7,6 @@ from fastapi.responses import JSONResponse
 dbConnection = ConnectionDB()
 roomRouter = APIRouter(prefix="/room", tags=["room"])
 
-@roomRouter.get("/", response_model=list[Room])
-async def rooms():
-     rooms = rooms_schema(dbConnection.obtener_habitaciones())
-     return JSONResponse(content=rooms)
 
 @roomRouter.get("/{id}", response_model=Room)
 async def room(id: str):

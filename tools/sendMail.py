@@ -6,7 +6,7 @@ import smtplib
 
 def sendmail(email_receiver:str , subject, body):
     email_sender = "keynova.auto@gmail.com"
-    email_password = os.getenv("MAIL_PASSWORD")
+    email_password = "qscu furx vwzt tago"
 
     em = EmailMessage()
     em["From"] = email_sender

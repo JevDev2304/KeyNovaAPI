@@ -1,6 +1,6 @@
 def access_schema(access) -> dict:
-    return {"Propiedad_idPropiedad": str(access[0]),
-            "Agente_idAgente": str(access[1])
+    return {"Propiedad_idPropiedad": int(access[0]),
+            "Agente_idAgente": int(access[1])
             }
 
 

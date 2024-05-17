@@ -5,7 +5,8 @@ def agent_schema(agent) -> dict:
             "nombre" : str(agent[2]),
             "correo" : str(agent[3]),
             "contrasennia": str(agent[4]),
-            "imagen": str(agent[5])
+            "imagen": str(agent[5]),
+            "clave_temporal": agent[6]
            }
 def agents_schema(agents) -> list:
     return [agent_schema(agent) for agent in agents]

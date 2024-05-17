@@ -1,6 +1,6 @@
 
 def owner_schema(owner) -> dict:
-    return {"idPropietario" : str(owner[0]),
+    return {"idPropietario" : int(owner[0]),
             "nombre" : str(owner[1]),
             "correo" : str(owner[2]),
             "genero": str(owner[3]),
