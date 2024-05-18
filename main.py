@@ -42,8 +42,8 @@ app.mount("/static", StaticFiles(directory="static"), name = "static")
 
 @app.middleware("http")
 async def jwt_middleware(request: Request, call_next):
-    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json", "/static/images/"] # Rutas que no requieren token
-    if not any(request.url.path.startswith(path) for path in exclude_paths):
+    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json"]  # Rutas que no requieren token
+    if request.url.path not in exclude_paths:
         token = request.headers.get("Authorization")
         if token is None :
             return JSONResponse(status_code=401, content={"message": "Unauthorized"})
