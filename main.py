@@ -11,12 +11,7 @@ from routers.access import accessRouter
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
-
-
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,21 +29,18 @@ app.include_router(propertyRouter)
 app.include_router(accessRouter)
 app.include_router(roomRouter)
 
-
-
-
-app.mount("/static", StaticFiles(directory="static"), name = "static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.middleware("http")
 async def jwt_middleware(request: Request, call_next):
-    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json"] # Rutas que no requieren token
+    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json"]  # Rutas que no requieren token
     if request.url.path.startswith("/static"):
         response = await call_next(request)
         return response
-    if request.url.path not in exclude_paths :
-        token = request.headers.get("Authorization")
-        if token is None :
+    if request.url.path not in exclude_paths:
+        token = request.cookies.get("_auth")
+        if token is None:
             return JSONResponse(status_code=401, content={"message": "Unauthorized the token JWT is Null"})
         try:
             verify_jwt_token(token)
@@ -58,10 +50,7 @@ async def jwt_middleware(request: Request, call_next):
     response = await call_next(request)
     return response
 
+
 @app.get("/")
 def read_root():
     return {"message": "¡Bienvenido a la API Keynova para la gestión de muebles de arrendamientos!"}
-
-
-
-
