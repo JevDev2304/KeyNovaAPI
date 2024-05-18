@@ -470,9 +470,10 @@ class ConnectionDB:
 
 
     def eliminar_mantenimiento(self, idMantenimiento: int):
-        self.obtener_mantenimiento_por_id(idMantenimiento)
+        mantenimiento = self.obtener_mantenimiento_por_id(idMantenimiento)
         query = "DELETE FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s"
         self.executeSQL(query, (idMantenimiento,))
+        return mantenimiento
 
     def obtener_mantenimiento_por_id(self, idMantenimiento: int):
         if not self.existe_mantenimiento_con_id(idMantenimiento):
@@ -480,6 +481,7 @@ class ConnectionDB:
         else:
             query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
             mantenimiento = self.executeSQL(query, (idMantenimiento,))
+            return mantenimiento
 
     def existe_mantenimiento_con_id(self, idMantenimiento):
         try:
