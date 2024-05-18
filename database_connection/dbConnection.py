@@ -101,9 +101,16 @@ class ConnectionDB:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email was not found")
 
-    #TODO obtener_propietario_por_id_propiedad
     def obtener_propietario_por_id_propiedad(self, id_propiedad: int):
-        pass
+        if not self.existe_propiedad_con_id(id_propiedad):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
+        else:
+            query = "SELECT * FROM PROPIETARIO p WHERE p.idPropietario = (SELECT Propietario_idPropietario FROM PROPIEDAD WHERE idPropiedad = %s);"
+            owner = self.executeSQL(query, (id_propiedad,))
+            if len(owner) > 0:
+                return owner[0]
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
     def eliminar_propietario(self, idPropietario: int):
         self.obtener_propietario_por_id(idPropietario)
         query = "DELETE FROM PROPIETARIO p WHERE p.idPropietario = %s"
