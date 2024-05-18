@@ -6,4 +6,4 @@ class Maintenance (BaseModel):
     Propiedad_idPropiedad: int
     descripcion: str
     fecha: str
-    descripcion: str
+    Agente_idAgente: int

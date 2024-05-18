@@ -32,6 +32,8 @@ async def owner(owner: Owner):
     owner_dict = owner_schema(dbConnection.obtener_propietario_por_correo(owner.correo))
     return JSONResponse(content=owner_dict)
 
+
+
 @ownerRouter.delete("/{mail}", status_code=status.HTTP_200_OK, response_model=Owner)
 async def owner(mail: str):
     owner = dbConnection.obtener_propietario_por_correo(mail)

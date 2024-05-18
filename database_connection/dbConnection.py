@@ -85,6 +85,7 @@ class ConnectionDB:
             return False
 
     def crear_clave_temporal(self, idAgente: int):
+        self.obtener_agente_por_id(idAgente)
         query = "UPDATE `keynova`.`agente` SET `clave_temporal` = %s WHERE `idAgente` = %s;"
         num_aleatorio = random.randint(100000, 999999)
         self.executeSQL(query, (num_aleatorio, idAgente))
@@ -100,6 +101,9 @@ class ConnectionDB:
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email was not found")
 
+    #TODO obtener_propietario_por_id_propiedad
+    def obtener_propietario_por_id_propiedad(self, id_propiedad: int):
+        pass
     def eliminar_propietario(self, idPropietario: int):
         self.obtener_propietario_por_id(idPropietario)
         query = "DELETE FROM PROPIETARIO p WHERE p.idPropietario = %s"
@@ -468,13 +472,14 @@ class ConnectionDB:
             mantenimientos = self.executeSQL(query,(Agente_idAgente,))
             return mantenimientos
 
-
+#FIXME I NEED THAT THIS METHOD RETURNS THE MAINTENANCE INFO
     def eliminar_mantenimiento(self, idMantenimiento: int):
         mantenimiento = self.obtener_mantenimiento_por_id(idMantenimiento)
         query = "DELETE FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s"
         self.executeSQL(query, (idMantenimiento,))
         return mantenimiento
 
+#FIXME THIS DOES NOT RETURN NOTHING
     def obtener_mantenimiento_por_id(self, idMantenimiento: int):
         if not self.existe_mantenimiento_con_id(idMantenimiento):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
