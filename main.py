@@ -42,11 +42,14 @@ app.mount("/static", StaticFiles(directory="static"), name = "static")
 
 @app.middleware("http")
 async def jwt_middleware(request: Request, call_next):
-    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json"]  # Rutas que no requieren token
-    if request.url.path not in exclude_paths:
+    exclude_paths = ["/agent/login", "/", "/docs", "/openapi.json"] # Rutas que no requieren token
+    if request.url.path.startswith("/static"):
+        response = await call_next(request)
+        return response
+    if request.url.path not in exclude_paths :
         token = request.headers.get("Authorization")
         if token is None :
-            return JSONResponse(status_code=401, content={"message": "Unauthorized"})
+            return JSONResponse(status_code=401, content={"message": "Unauthorized the token JWT is Null"})
         try:
             verify_jwt_token(token)
         except HTTPException as e:
