@@ -1,5 +1,4 @@
 import random
-
 from fastapi import HTTPException, status
 import mysql.connector
 
@@ -465,7 +464,10 @@ class ConnectionDB:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
             query = ("select m.idMantenimiento, m.Propiedad_idPropiedad, m.descripcion, m.fecha, m.Agente_idAgente "
-                     "from agente a join mantenimiento m on a.idAgente = m.Agente_idAgente;")
+                     "from agente a join mantenimiento m on a.idAgente = m.Agente_idAgente where a.idAgente = %s;")
+            mantenimientos = self.executeSQL(query,(Agente_idAgente,))
+            return mantenimientos
+
 
     def eliminar_mantenimiento(self, idMantenimiento: int):
         self.obtener_mantenimiento_por_id(idMantenimiento)
