@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow connections from any origin
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,8 +43,7 @@ async def jwt_middleware(request: Request, call_next):
         if token is None:
             return JSONResponse(status_code=401, content={"message": "Unauthorized the token JWT is Null"})
         try:
-            cleaned_token = token.replace("Bearer ", "")
-            verify_jwt_token(cleaned_token)
+            verify_jwt_token(token)
         except HTTPException as e:
             return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 
