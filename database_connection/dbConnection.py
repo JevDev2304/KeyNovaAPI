@@ -52,6 +52,7 @@ class ConnectionDB:
             query = "SELECT * FROM AGENTE WHERE tipo = 'mantenimiento'"
             agentes = self.executeSQL(query)
             for agente in agentes:
+                agente = list(agente)
                 if self.existe_acceso(idPropiedad, agente[0]):
                     agente.append(True)
                 else:
