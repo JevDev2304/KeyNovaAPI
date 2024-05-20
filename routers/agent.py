@@ -26,18 +26,12 @@ async def login(mail: str, password : str):
 
 
 
-
-#TODO OTPHTML(num)
 @agentRouter.post("/sendOTP", status_code=status.HTTP_200_OK)
 async def sendOTP(id_agent: int):
     agent = agent_schema(dbConnection.obtener_agente_por_id(id_agent))
     num=temporal_password(id_agent)
     sendmail(agent["correo"],"OTP VALIDATION", OTPHTML(num))
-
-@agentRouter.get("/maintenanceAgents")
-async def maintenanceAgents():
-    agents = dbConnection.obtener_agentes_mantenimiento()
-    return JSONResponse(content=agents_schema(agents))
+    return JSONResponse(content={"message":"OTP SENT"})
 
 
 @agentRouter.post("/inkInventory")
@@ -58,7 +52,7 @@ def validate_temporal_password(id_agent :int, num: int):
     return False
 def temporal_password(id_agent : int ):
     num=dbConnection.crear_clave_temporal(id_agent)
-    return JSONResponse(content={"num" : num})
+    return num
 
 
 #TODO JUANFER inventoryHTML(inventory)

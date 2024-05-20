@@ -5,3 +5,4 @@ class Property(BaseModel):
     Propietario_idPropietario : int
     direccion: str
     imagen: str | None
+    firmado: int

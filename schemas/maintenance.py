@@ -3,7 +3,7 @@ def maintenance_schema(maintenance :tuple) -> dict:
         "idMantenimiento": maintenance[0],
         "Propiedad_idPropiedad": maintenance[1],
         "descripcion": maintenance[2],
-        "fecha": maintenance[3],
+        "fecha": str(maintenance[3]),
         "Agente_idAgente": maintenance[4],
 
     }

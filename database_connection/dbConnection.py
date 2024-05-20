@@ -108,7 +108,7 @@ class ConnectionDB:
         if len(owner) > 0:
             return owner[0]
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this email was not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
 
     def obtener_propietario_por_id_propiedad(self, id_propiedad: int):
         if not self.existe_propiedad_con_id(id_propiedad):
@@ -273,7 +273,7 @@ class ConnectionDB:
         query = "DELETE FROM PROPIEDAD p WHERE p.idPropiedad = %s"
         self.executeSQL(query, (idPropiedad,))
 
-    def _agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str, firmado: int):
+    def agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str, firmado: int):
         if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:

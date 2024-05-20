@@ -1,8 +1,8 @@
 #TODO JUANFER inventoryHTML(inventory)
 def inventoryHTML(inventory: dict) -> str:
-    pass
+    return f"<body>{inventory}</body>"
 
 def OTPHTML(num: int) -> str:
-    pass
+    return f"<body> OTP :{num} </body>"
 def maintenanceHTML(maintenance: dict) -> str:
-    pass
+    return f"<body>{str(maintenance)}</body>"

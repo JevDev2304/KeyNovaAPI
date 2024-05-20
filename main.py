@@ -7,7 +7,7 @@ from tools.jwt_auth_agent import verify_jwt_token
 from routers.room import roomRouter
 from routers.property import propertyRouter
 from routers.access import accessRouter
-
+from routers.maintenance import maintenancesRouter
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,7 +24,7 @@ app.add_middleware(
 app.include_router(ownerRouter)
 app.include_router(agentRouter)
 app.include_router(furnitureRouter)
-
+app.include_router(maintenancesRouter)
 app.include_router(propertyRouter)
 app.include_router(accessRouter)
 app.include_router(roomRouter)
