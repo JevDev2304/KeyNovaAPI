@@ -12,7 +12,7 @@ def create_jwt_token(data: dict , KEY = "GatoCatGattoChatGatKatzeKotNekoKissaKed
         "exp": expire
     }
     token = jwt.encode(payload, KEY, algorithm="HS256")
-    return  token
+    return "Bearer "+token
 
 def verify_jwt_token(token: str):
     try:

@@ -39,11 +39,12 @@ async def jwt_middleware(request: Request, call_next):
         response = await call_next(request)
         return response
     if request.url.path not in exclude_paths:
-        token = request.cookies.get("_auth")
+        token = request.headers.get("Authorization")
+        cleaned_token = token.replace("Bearer ", "")
         if token is None:
             return JSONResponse(status_code=401, content={"message": "Unauthorized the token JWT is Null"})
         try:
-            verify_jwt_token(token)
+            verify_jwt_token(cleaned_token)
         except HTTPException as e:
             return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 
