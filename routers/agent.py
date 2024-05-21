@@ -45,6 +45,8 @@ async def sendOTP(id_agent: int):
 async def inkInventory(id_agent: int, num: int, id_propiedad :int):
     if validate_temporal_password(id_agent, num):
         send_inventory_mail_owner(id_propiedad)
+        temporal_password(id_agent)
+        return JSONResponse(content={"message":"INVENTORY SENT"})
     else:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Incorrect OTP PASSWORD")
 
