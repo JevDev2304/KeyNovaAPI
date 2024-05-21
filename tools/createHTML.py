@@ -46,8 +46,8 @@ def inventoryHTML(inventory: dict) -> str:
             }
             .section img {
                 width: 100%;
-                max-width: 300px;
-                height: auto;
+                width: 300px;
+                height: 300px;
                 border: 1px solid #0E9594;
                 border-radius: 12px;
                 margin-bottom: 12px;
