@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI, Request, HTTPException
 from routers.owner import ownerRouter
 from routers.agent import agentRouter
@@ -38,3 +39,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/")
 def read_root():
     return {"message": "¡Bienvenido a la API Keynova para la gestión de muebles de arrendamientos!"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info", use_colors=True)
