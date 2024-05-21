@@ -8,6 +8,7 @@ from schemas.agent import agents_schema, agent_schema
 from tools.sendMail import sendmail
 from tools.createHTML import OTPHTML, inventoryHTML
 from schemas.agent import agent_schema
+from schemas.agent_maintenance_true_false import agents_schema_bool, agent_schema_bool
 
 dbConnection = ConnectionDB()
 agentRouter = APIRouter(prefix="/agent", tags=["agent"])
@@ -26,6 +27,12 @@ async def login(mail: str, password : str):
 
 
 
+@agentRouter.get("/getAgentMaintenances/{id}", status_code=status.HTTP_200_OK)
+async def maintenanceAgents(propertyId: int):
+    agents = agents_schema_bool(dbConnection.obtener_agentes_mantenimiento_acceso_a_propiedad(propertyId))
+    return JSONResponse(content=agents)
+
+
 @agentRouter.post("/sendOTP", status_code=status.HTTP_200_OK)
 async def sendOTP(id_agent: int):
     agent = agent_schema(dbConnection.obtener_agente_por_id(id_agent))
@@ -34,7 +41,7 @@ async def sendOTP(id_agent: int):
     return JSONResponse(content={"message":"OTP SENT"})
 
 
-@agentRouter.post("/inkInventory")
+@agentRouter.post("/signingInventory")
 async def inkInventory(id_agent: int, num: int, id_propiedad :int):
     if validate_temporal_password(id_agent, num):
         send_inventory_mail_owner(id_propiedad)
@@ -55,7 +62,7 @@ def temporal_password(id_agent : int ):
     return num
 
 
-#TODO JUANFER inventoryHTML(inventory)
+
 def send_inventory_mail_owner(id_prop :int):
     property= dbConnection.obtener_propiedad_por_id(id_prop)
     property_dict = property_schema(property)

@@ -51,13 +51,17 @@ class ConnectionDB:
         else:
             query = "SELECT * FROM AGENTE WHERE tipo = 'mantenimiento'"
             agentes = self.executeSQL(query)
+            agentes_list = []
             for agente in agentes:
-                agente = list(agente)
+                agente_lista = list(agente)
                 if self.existe_acceso(idPropiedad, agente[0]):
-                    agente.append(True)
+                    agente_lista.append(True)
+
                 else:
-                    agente.append(False)
-            return agentes
+                    agente_lista.append(False)
+                agentes_list.append(agente_lista)
+            print(agentes_list)
+            return agentes_list
 
     def eliminar_agente(self, idAgente: int):
         self.obtener_agente_por_id(idAgente)  # Para que salga la excepcion de ahi

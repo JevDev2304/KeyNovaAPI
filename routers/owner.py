@@ -2,7 +2,6 @@ from fastapi import APIRouter, status, HTTPException
 from database_connection.dbConnection import ConnectionDB
 from schemas.owner import owner_schema, owners_schema
 from models.owner import Owner
-from models.email import Email
 from tools.sendMail import sendmail
 from tools.createHTML import inventoryHTML
 from fastapi.responses import JSONResponse
