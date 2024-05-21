@@ -34,14 +34,14 @@ async def agent_properties(agent_id: str):
 
 
 @propertyRouter.post("/", status_code=status.HTTP_201_CREATED, response_model=Property)
-async def property(Propietario_idPropietario: int, direccion: str, image: UploadFile = File(...)):
+async def property(idAgente, Propietario_idPropietario: int, direccion: str, image: UploadFile = File(...)):
     img_dir = await upload_img(ABSOLUTE_IMG_DIR, image)
     dict_property = {
         "Propietario_idPropietario": Propietario_idPropietario,
         "direccion": direccion,
         "imagen": img_dir,
         "firmado": 0}
-    last_property = property_schema(dbConnection.agregar_propiedad(**dict_property))
+    last_property = property_schema(dbConnection.agregar_propiedad_con_agente(idAgente, **dict_property))
     return JSONResponse(content=last_property)
 
 
