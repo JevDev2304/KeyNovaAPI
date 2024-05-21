@@ -230,7 +230,7 @@ def inventoryHTML(inventory: dict) -> str:
         ht += '''
                        <div class="section">
                     <p>''' + habitacion["nombre"] + '''</p>
-                    <img src="''' + obtener_link_imagen(habitacion["imagen"]) + ''''">
+                    <img src="''' + obtener_link_imagen(habitacion["imagen"]) + '''">
                     <p>''' + habitacion["descripcion"] + '''</p>
                     </div>'''
         cont += 1
