@@ -141,4 +141,4 @@ def inventoryHTML(inventory: dict) -> str:
 
 
 def obtener_link_imagen(nombre_img):
-    return "http://127.0.0.1:8000/static/images/" + nombre_img
+    return "https://keynovaapi.onrender.com/static/images/" + nombre_img
