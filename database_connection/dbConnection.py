@@ -276,7 +276,8 @@ class ConnectionDB:
     def eliminar_propiedad(self, idPropiedad: int):
         self.obtener_propiedad_por_id(idPropiedad)
         query = "DELETE FROM PROPIEDAD p WHERE p.idPropiedad = %s"
-        self.executeSQL(query, (idPropiedad,))
+        variable = (idPropiedad,)
+        self.executeSQL(query, variable)
 
     def agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str, firmado: int):
         if not self.existe_propietario_con_id(Propietario_idPropietario):
@@ -294,7 +295,7 @@ class ConnectionDB:
         if not self.existe_propietario_con_id(Propietario_idPropietario):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
         else:
-            property = self._agregar_propiedad(Propietario_idPropietario, direccion, imagen, firmado)
+            property = self.agregar_propiedad(Propietario_idPropietario, direccion, imagen, firmado)
             self.agregar_acceso(property[0], id_agente)
             return property
 

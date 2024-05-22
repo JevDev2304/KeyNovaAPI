@@ -12,7 +12,7 @@ furnitureRouter = APIRouter(prefix="/furniture", tags=["furniture"])
 
 @furnitureRouter.get("/{id}", response_model=Furniture)
 async def furniture(id: int):
-    furniture = dbConnection.obtener_mueble_por_id()
+    furniture = dbConnection.obtener_mueble_por_id(id)
     furniture_dict = furniture_schema(furniture)
     return JSONResponse(content=furniture_dict)
 
@@ -37,8 +37,7 @@ async def update_image(id:int , image: UploadFile = File(...)):
     del furniture["Habitacion_idHabitacion"]
     furniture["imagen"] = img_dir
     dbConnection.actualizar_mueble(**furniture)
-    furniture_final = furniture_schema(dbConnection.obtener_mueble_por_id(id))
-    return JSONResponse(content=furniture_final)
+    return JSONResponse(content={"message" : "Imagen actualizada"})
 
 
 @furnitureRouter.put("/update_string", status_code=status.HTTP_200_OK,response_model=Furniture)

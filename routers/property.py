@@ -10,8 +10,6 @@ from tools.createHTML import inventoryHTML
 
 dbConnection = ConnectionDB()
 propertyRouter = APIRouter(prefix="/property", tags=["property"])
-
-
 @propertyRouter.get("/", response_model=Property)
 async def property(id: str):
     property = dbConnection.obtener_propiedad_por_id(int(id))
