@@ -35,6 +35,7 @@ class ConnectionDB:
                 return resultados
         except mysql.connector.Error as e:
             print("Error al conectar a la base de datos:", e)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al conectar a la base de datos"+e)
 
     # TODO: AGENTE (Siempre están quemados)
     def obtener_agente_por_id(self, idAgente: int):
@@ -526,3 +527,5 @@ class ConnectionDB:
 
 
 c = ConnectionDB()
+#c.agregar_propiedad_con_agente(1, 1, "direccion", "imagen")
+c.agregar_propiedad_con_agente(1,1,"direccion","imagen")
