@@ -14,23 +14,18 @@ maintenancesRouter = APIRouter(prefix="/maintenance", tags=["maintenance"])
 
 @maintenancesRouter.get("/agentIdMaintenance", response_model=list[Maintenance])
 async def maintenances_of_agent_maintenance(id: int):
-    if dbConnection.existe_agente_con_id(id):
-        maintenances = maintenances_schema(dbConnection.obtener_mantenimientos_por_id_agente_mantenimiento(id))
-        return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance Agent with this id was not found")
+    maintenances = maintenances_schema(dbConnection.obtener_mantenimientos_por_id_agente_mantenimiento(id))
+    return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances)
 
 @maintenancesRouter.get("/agentIdCommercial", response_model=list[Maintenance])
 async def maintenances_of_agent_commercial(id: int):
-    if dbConnection.existe_agente_con_id(id):
-        maintenances = dbConnection.obtener_mantenimientos_por_id_agente_comercial(id)
-        return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances_schema(maintenances))
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comercial Agent with this id was not found")
+    maintenances = dbConnection.obtener_mantenimientos_por_id_agente_comercial(id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances_schema(maintenances))
+
+# FIXME
 @maintenancesRouter.post("/")
 async def maintenance(maintenance: Maintenance):
     property=property_schema(dbConnection.obtener_propiedad_por_id(maintenance.Propiedad_idPropiedad))
-    dbConnection.obtener_agente_por_id(maintenance.Agente_idAgente)
     if not check_date(maintenance.fecha):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid date")
     owner= owner_schema(dbConnection.obtener_propietario_por_id_propiedad(maintenance.Propiedad_idPropiedad))
@@ -43,19 +38,14 @@ async def maintenance(maintenance: Maintenance):
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Maintenance created"})
 @maintenancesRouter.get("/propertyId")
 async def maintenances_of_property(id: int):
-    if dbConnection.existe_propiedad_con_id(id):
-        maintenances = dbConnection.obtener_mantenimientos_por_id_propiedad(id)
-        return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances_schema(maintenances))
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
+    maintenances = dbConnection.obtener_mantenimientos_por_id_propiedad(id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=maintenances_schema(maintenances))
 
 @maintenancesRouter.delete("/")
 async def delete_maintenance(id: int):
-    if dbConnection.existe_mantenimiento_con_id(id):
-        dbConnection.eliminar_mantenimiento(id)
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Maintenance deleted"})
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+    dbConnection.eliminar_mantenimiento(id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Maintenance deleted"})
+
 def check_date(date: str) -> bool:
     try:
         datetime.strptime(date, '%Y-%m-%d')

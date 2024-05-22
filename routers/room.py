@@ -31,12 +31,13 @@ async def room(Propiedad_idPropiedad: int,nombre : str , descripcion = None, ima
 @roomRouter.put("/", status_code=status.HTTP_200_OK, response_model=Room)
 async def update_image(id:int , image: UploadFile = File(...)):
     img_dir = await upload_img(ABSOLUTE_IMG_DIR, image)
-    room = room_schema(dbConnection.obtener_habitacion_por_id(id))
+    room_dict = room_schema(dbConnection.obtener_habitacion_por_id(id))
+    room = room_dict.copy()
     delete_image(ABSOLUTE_IMG_DIR + room["imagen"])
     del room["Propiedad_idPropiedad"]
     room["imagen"] = img_dir
     dbConnection.actualizar_habitacion(**room)
-    room_final = room_schema(dbConnection.obtener_habitacion_por_id(id))
+    room_final = room_schema((room_dict["idHabitacion"],room_dict["Propiedad_idPropiedad"],img_dir,room_dict["nombre"],room_dict["descripcion"]))
     return JSONResponse(content=room_final)
 
 
@@ -44,7 +45,7 @@ async def update_image(id:int , image: UploadFile = File(...)):
 async def update_strings(id:int ,nombre :str, descripcion : str):
     room = room_schema(dbConnection.obtener_habitacion_por_id(id))
     dbConnection.actualizar_habitacion(room["idHabitacion"], room["imagen"], nombre, descripcion)
-    final_room = room_schema(dbConnection.obtener_habitacion_por_id(id))
+    final_room = room_schema((room["idHabitacion"],room["Propiedad_idPropiedad"],room["imagen"],nombre,descripcion))
     return JSONResponse(content=final_room)
 
 

@@ -34,14 +34,13 @@ async def owner(owner: Owner):
     owner_dict = dict(owner)
     owner_dict["genero"] = correctGenre(owner_dict["genero"])
     del owner_dict["idPropietario"]
-    dbConnection.agregar_propietario(**owner_dict)
-    owner_dict = owner_schema(dbConnection.obtener_propietario_por_correo(owner.correo))
+    owner_dict = owner_schema(dbConnection.agregar_propietario(**owner_dict))
     return JSONResponse(content=owner_dict)
 
 
 
 
-
+# FIXME METODO EN BD PARA BORRAR PROPIETARIO POR CORREO
 @ownerRouter.delete("/{mail}", status_code=status.HTTP_200_OK, response_model=Owner)
 async def owner(mail: str):
     owner = dbConnection.obtener_propietario_por_correo(mail)
