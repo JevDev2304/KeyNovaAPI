@@ -496,14 +496,15 @@ class ConnectionDB:
         query = "DELETE FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s"
         self.executeSQL(query, (idMantenimiento,))
         return mantenimiento
-    # FIXME
+
     def obtener_mantenimiento_por_id(self, idMantenimiento: int):
-        if not self.existe_mantenimiento_con_id(idMantenimiento):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+        query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
+        mantenimiento = self.executeSQL(query, (idMantenimiento,))
+        if len(mantenimiento) > 0:
+            return mantenimiento[0]
         else:
-            query = "SELECT * FROM MANTENIMIENTO m WHERE m.idMantenimiento = %s;"
-            mantenimiento = self.executeSQL(query, (idMantenimiento,))
-            return mantenimiento
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance with this id was not found")
+
     # TODO: BORRAR Y REEMPLAZAR
     def existe_mantenimiento_con_id(self, idMantenimiento):
         try:
@@ -515,7 +516,6 @@ class ConnectionDB:
                 return False
         except Exception:
             return False
-
     # TODO: INVENTARIO
     # FIXME
     def obtener_inventario_por_id_propiedad(self, Propiedad_idPropiedad):
