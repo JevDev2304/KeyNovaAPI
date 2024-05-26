@@ -21,37 +21,26 @@ class DB:
         connection = self.get_mysql_connection()
         cursor = connection.cursor()
         try:
-            # Iniciar una transacción
             cursor.execute("START TRANSACTION")
-
-            # Agregar la propiedad y obtener el id de la propiedad recién agregada
             cursor.execute("INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`, `direccion`, `imagen`, `firmado`) "
                            "VALUES (%s, %s, %s, %s) "
                            "ON DUPLICATE KEY UPDATE `Propietario_idPropietario` = VALUES(`Propietario_idPropietario`), "
                            "`direccion` = VALUES(`direccion`), `imagen` = VALUES(`imagen`), `firmado` = VALUES(`firmado`);",
                            (Propietario_idPropietario, direccion, imagen, firmado))
             property_id = cursor.lastrowid
-
-            # Agregar acceso al agente
             cursor.execute("INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`, `Agente_idAgente`) "
                            "VALUES (%s, %s) "
                            "ON DUPLICATE KEY UPDATE `Propiedad_idPropiedad` = VALUES(`Propiedad_idPropiedad`), "
                            "`Agente_idAgente` = VALUES(`Agente_idAgente`);",
                            (property_id, id_agente))
-
-            # Confirmar la transacción
             cursor.execute("COMMIT")
-
-            # Devolver los detalles de la propiedad recién agregada
             cursor.execute("SELECT * FROM propiedad WHERE idPropiedad = %s", (property_id,))
             return cursor.fetchone()
-
         except mysql.connector.Error as e:
             if e.errno == 1452:
                 cursor.execute("ROLLBACK")
                 raise HTTPException(status_code=400, detail="No se encontró el agente o la propiedad")
             # Revertir la transacción en caso de error
-
         finally:
             cursor.close()
             connection.close()

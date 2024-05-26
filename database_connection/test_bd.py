@@ -1,77 +1,53 @@
-import time
+import random
+from fastapi import HTTPException, status
 import mysql.connector
-from mysql.connector.errors import Error
-from fastapi import HTTPException
+from mysql.connector import pooling
 
-def get_mysql_connection():
-    try:
-        connection = mysql.connector.connect(
-            host='project1.mysql.database.azure.com',
-            port='3306',
-            user='JUANFER',
-            password='Duko0505',
-            database='keynova'
-        )
-        return connection
-    except Error as e:
-        print("Error while connecting to MySQL", e)
-        raise HTTPException(status_code=500, detail=e.msg)
+config = {'user': 'JUANFER',
+          'host': 'project1.mysql.database.azure.com',
+          'password': 'Duko0505',
+          'database': 'keynova',
+          'port': 3306,  # Puerto predeterminado de MySQL
+          'raise_on_warnings': True}  # Para que se generen excepciones en caso de advertencias
 
-def agregar_propiedad_con_agente_mysql_connector(id_agente: int, Propietario_idPropietario: int, direccion: str, imagen: str, firmado: int = 0):
-    connection = get_mysql_connection()
-    cursor = connection.cursor()
-    try:
-        # Iniciar una transacción
-        cursor.execute("START TRANSACTION")
 
-        # Agregar la propiedad y obtener el id de la propiedad recién agregada
-        cursor.execute("INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`, `direccion`, `imagen`, `firmado`) "
-                       "VALUES (%s, %s, %s, %s) "
-                       "ON DUPLICATE KEY UPDATE `Propietario_idPropietario` = VALUES(`Propietario_idPropietario`), "
-                       "`direccion` = VALUES(`direccion`), `imagen` = VALUES(`imagen`), `firmado` = VALUES(`firmado`);",
-                       (Propietario_idPropietario, direccion, imagen, firmado))
-        property_id = cursor.lastrowid
+class ConnectionDB:
+    conn = None  # Mantén la conexión abierta en la instancia
 
-        # Agregar acceso al agente
-        cursor.execute("INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`, `Agente_idAgente`) "
-                       "VALUES (%s, %s) "
-                       "ON DUPLICATE KEY UPDATE `Propiedad_idPropiedad` = VALUES(`Propiedad_idPropiedad`), "
-                       "`Agente_idAgente` = VALUES(`Agente_idAgente`);",
-                       (property_id, id_agente))
+    def __init__(self):
+        dbconfig = {
+            "user": 'JUANFER',
+            "password": 'Duko0505',
+            "host": 'project1.mysql.database.azure.com',
+            "port": '3306',
+            "database": 'keynova'
+        }
 
-        # Confirmar la transacción
-        cursor.execute("COMMIT")
+        pool = pooling.MySQLConnectionPool(pool_name="mypool",
+                                           pool_size=5,
+                                           **dbconfig)
 
-        # Devolver los detalles de la propiedad recién agregada
-        cursor.execute("SELECT * FROM propiedad WHERE idPropiedad = %s", (property_id,))
-        return cursor.fetchone()
+        try:
+            connection = pool.get_connection()
+            ConnectionDB.conn = connection
+        except Error as e:
+            print("Error while connecting to MySQL", e)
+            raise HTTPException(status_code=500, detail=e.msg)
 
-    except mysql.connector.Error as e:
-        if e.errno == 1452:
-            cursor.execute("ROLLBACK")
-            raise HTTPException(status_code=400, detail="No se encontró el agente o la propiedad")
-        # Revertir la transacción en caso de error
+    def executeSQL(self, consulta_sql, variables_adicionales=None):
 
-    finally:
-        cursor.close()
-        connection.close()
+        cursor = conn.cursor()
+        try:
 
-# Función para medir el tiempo de ejecución del método
-def compare_execution_time():
-    connection = get_mysql_connection()
-    cursor = connection.cursor()
+            # Agregar la propiedad y obtener el id de la propiedad recién agregada
+            cursor.execute(consulta_sql, variables_adicionales)
 
-    start_time = time.time()
-    propiedad = agregar_propiedad_con_agente_mysql_connector(1, 1, "prueba optimizada", "imagen")
-    end_time = time.time()
-    execution_time = end_time - start_time
+            if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
+                    "UPDATE") or consulta_sql.strip().upper().startswith(
+                "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
+                return None
 
-    cursor.close()
-    connection.close()
+            return cursor.fetchone()
 
-    print("Tiempo de ejecución para mysql-connector-python:", execution_time)
-    return propiedad
-
-propiedad_mysql_connector = compare_execution_time()
-print(propiedad_mysql_connector)
-
+        finally:
+            cursor.close()

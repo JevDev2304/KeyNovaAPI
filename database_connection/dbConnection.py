@@ -1,6 +1,8 @@
 import random
+import time
+
 from fastapi import HTTPException, status
-import mysql.connector
+from mysql.connector import pooling, Error
 
 config = {'user': 'JUANFER',
           'host': 'project1.mysql.database.azure.com',
@@ -11,31 +13,45 @@ config = {'user': 'JUANFER',
 
 
 class ConnectionDB:
-    conn = None  # Mantén la conexión abierta en la instancia
+
 
     def __init__(self):
-        pass
+        dbconfig = {
+            "user": 'JUANFER',
+            "password": 'Duko0505',
+            "host": 'project1.mysql.database.azure.com',
+            "port": '3306',
+            "database": 'keynova'
+        }
+        self.conn = None  # Mantén la conexión abierta en la instancia
+        pool = pooling.MySQLConnectionPool(pool_name="mypool",
+                                           pool_size=5,
+                                           **dbconfig)
+
+        try:
+            connection = pool.get_connection()
+            self.conn = connection
+        except Error as e:
+            print("Error while connecting to MySQL", e)
+            raise HTTPException(status_code=500, detail=e.msg)
 
     def executeSQL(self, consulta_sql, variables_adicionales=None):
+
+        cursor = self.conn.cursor()
         try:
-            conn = mysql.connector.connect(**config)  # Abre la conexión si no está abierta
 
-            if conn.is_connected():
-                cursor = conn.cursor()
-                cursor.execute(consulta_sql, variables_adicionales)
+            # Agregar la propiedad y obtener el id de la propiedad recién agregada
+            cursor.execute(consulta_sql, variables_adicionales)
 
-                if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
-                        "UPDATE") or consulta_sql.strip().upper().startswith(
-                    "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
-                    conn.commit()
-                    return None
+            if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
+                    "UPDATE") or consulta_sql.strip().upper().startswith(
+                "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
+                return None
 
-                resultados = cursor.fetchall()
-                conn.close()
-                return resultados
-        except mysql.connector.Error as e:
-            print("Error al conectar a la base de datos:", e)
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al conectar a la base de datos"+e)
+            return cursor.fetchall()
+
+        finally:
+            cursor.close()
 
     # TODO: AGENTE (Siempre están quemados)
     def obtener_agente_por_id(self, idAgente: int):
@@ -181,6 +197,7 @@ class ConnectionDB:
             else:
                 return False
         except Exception as e:
+            print(e.args)
             return False
         # TODO: ACCESO
 
@@ -524,8 +541,3 @@ class ConnectionDB:
                     habitacion["muebles"].append(mueble)
                 inventario["habitaciones"].append(habitacion)
             return inventario
-
-
-c = ConnectionDB()
-#c.agregar_propiedad_con_agente(1, 1, "direccion", "imagen")
-c.agregar_propiedad_con_agente(1,1,"direccion","imagen")
