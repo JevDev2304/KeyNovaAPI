@@ -46,7 +46,8 @@ class ConnectionDB:
             if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
                     "UPDATE") or consulta_sql.strip().upper().startswith(
                 "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
-                return None
+                self.conn.commit()
+                return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
 
             return cursor.fetchall()
 
