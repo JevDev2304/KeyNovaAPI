@@ -36,23 +36,20 @@ class ConnectionDB:
             raise HTTPException(status_code=500, detail=e.msg)
 
     def executeSQL(self, consulta_sql, variables_adicionales=None):
-
         cursor = self.conn.cursor()
-        try:
+        # Agregar la propiedad y obtener el id de la propiedad recién agregada
+        cursor.execute(consulta_sql, variables_adicionales)
 
-            # Agregar la propiedad y obtener el id de la propiedad recién agregada
-            cursor.execute(consulta_sql, variables_adicionales)
-
-            if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
-                    "UPDATE") or consulta_sql.strip().upper().startswith(
-                "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
-                self.conn.commit()
-                return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
-
-            return cursor.fetchall()
-
-        finally:
+        if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
+                "UPDATE") or consulta_sql.strip().upper().startswith(
+            "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
+            self.conn.commit()
             cursor.close()
+            return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
 
     # TODO: AGENTE (Siempre están quemados)
     def obtener_agente_por_id(self, idAgente: int):
@@ -316,18 +313,31 @@ class ConnectionDB:
                 return False
         except Exception:
             return False
-    # FIXME
+
     def obtener_propiedades_por_id_agente(self, idAgente):
-        if not self.existe_agente_con_id(idAgente):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
-        else:
+        cursor = self.conn.cursor()
+        try:
+            query_check_agent = "SELECT COUNT(*) FROM agente WHERE idAgente = %s;"
+            cursor.execute(query_check_agent, (idAgente,))
+            agent_exists = cursor.fetchone()[0]
+            if agent_exists == 0:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
+            # Obtener propiedades
             query = (
-                "select idPropiedad,Propietario_idPropietario, direccion, p.imagen, p.firmado from propiedad p join (select "
-                "* from agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg "
-                "on p.idPropiedad = acg.Propiedad_idPropiedad;")
-            variables = (idAgente,)
-            properties = self.executeSQL(query, variables)
+                "SELECT p.idPropiedad, p.Propietario_idPropietario, p.direccion, p.imagen, p.firmado "
+                "FROM propiedad p "
+                "JOIN acceso ac ON p.idPropiedad = ac.Propiedad_idPropiedad "
+                "WHERE ac.Agente_idAgente = %s;"
+            )
+            cursor.execute(query, (idAgente,))
+            properties = cursor.fetchall()
             return properties
+        except Error as e:
+            print(f"Error: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            cursor.close()
+
     # FIXME
     def obtener_propietarios_por_id_agente(self, idAgente):
         if not self.existe_agente_con_id(idAgente):
@@ -357,12 +367,14 @@ class ConnectionDB:
                  "`nombre` = %s, `descripcion` = %s WHERE `idHabitacion` = %s;")
         variables = (imagen, nombre, descripcion, idHabitacion)
         self.executeSQL(query, variables)
+
     # FIXME
     def eliminar_habitacion(self, idHabitacion: int):
         habitacion = (self.obtener_habitacion_por_id(idHabitacion))
         query = "DELETE FROM HABITACION h WHERE h.idHabitacion = %s"
         self.executeSQL(query, (idHabitacion,))
         return habitacion
+
     # FIXME
     def agregar_habitacion(self, Propiedad_idPropiedad: int, imagen: str, nombre: str, descripcion):
         if not self.existe_propiedad_con_id(Propiedad_idPropiedad):
@@ -376,6 +388,7 @@ class ConnectionDB:
             self.executeSQL(query, variables)
             query = "SELECT * FROM habitacion ORDER BY idHabitacion DESC LIMIT 1;"
             return self.executeSQL(query)[0]
+
     # FIXME
     def obtener_habitaciones_por_id_propiedad(self, idPropiedad):
         if not self.existe_propiedad_con_id(idPropiedad):
@@ -384,6 +397,7 @@ class ConnectionDB:
             query = "SELECT * FROM HABITACION h WHERE h.Propiedad_idPropiedad = %s;"
             habitaciones = self.executeSQL(query, (idPropiedad,))
             return habitaciones
+
     # TODO: BORRAR Y REEMPLAZAR
     def existe_habitacion_con_id(self, idHabitacion):
         try:
@@ -406,6 +420,7 @@ class ConnectionDB:
             query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
             mueble = self.executeSQL(query, (idMueble,))
             return mueble[0]
+
     # TODO: BORRAR Y REEMPLAZAR
     def existe_mueble_con_id(self, idMueble):
         try:
@@ -418,6 +433,7 @@ class ConnectionDB:
                 return False
         except Exception:
             return False
+
     # FIXME
     def actualizar_mueble(self, idMueble: int, estado: str, imagen: str, descripcion: str,
                           nombre: str):
@@ -425,12 +441,14 @@ class ConnectionDB:
                  "`descripcion` = %s, `nombre` = %s WHERE `idMueble` = %s;")
         variables = (estado, imagen, descripcion, nombre, idMueble)
         self.executeSQL(query, variables)
+
     # FIXME
     def eliminar_mueble(self, idMueble: int):
         mueble = self.obtener_mueble_por_id(idMueble)
         query = "DELETE FROM MUEBLE m WHERE m.idMueble = %s"
         self.executeSQL(query, (idMueble,))
         return mueble
+
     # FIXME
     def agregar_mueble(self, Habitacion_idHabitacion: int, estado: str, imagen: str, descripcion: str, nombre: str):
         if not self.existe_habitacion_con_id(Habitacion_idHabitacion):
@@ -444,7 +462,6 @@ class ConnectionDB:
             return self.executeSQL(query)[0]
 
     # FIXME
-
     def obtener_muebles_por_id_habitacion(self, Habitacion_idHabitacion):
         if not self.existe_habitacion_con_id(Habitacion_idHabitacion):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room with this id was not found")
@@ -470,6 +487,7 @@ class ConnectionDB:
             query = "SELECT * FROM MANTENIMIENTO m WHERE m.Propiedad_idPropiedad = %s;"
             mantenimientos = self.executeSQL(query, (Propiedad_idPropiedad,))
             return mantenimientos
+
     # FIXME
     def obtener_mantenimientos_por_id_agente_comercial(self, Agente_idAgente):
         if not self.existe_agente_con_id(Agente_idAgente):
@@ -481,6 +499,7 @@ class ConnectionDB:
                      "on p.idPropiedad = acg.Propiedad_idPropiedad) aca on m.Propiedad_idPropiedad = aca.idPropiedad")
             mantenimientos = self.executeSQL(query, (Agente_idAgente,))
             return mantenimientos
+
     # FIXME
     def obtener_mantenimientos_por_id_agente_mantenimiento(self, Agente_idAgente):
         if not self.existe_agente_con_id(Agente_idAgente):
@@ -490,6 +509,7 @@ class ConnectionDB:
                      "from agente a join mantenimiento m on a.idAgente = m.Agente_idAgente where a.idAgente = %s;")
             mantenimientos = self.executeSQL(query, (Agente_idAgente,))
             return mantenimientos
+
     # FIXME
     def eliminar_mantenimiento(self, idMantenimiento: int):
         mantenimiento = self.obtener_mantenimiento_por_id(idMantenimiento)
