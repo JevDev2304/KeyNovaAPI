@@ -7,3 +7,6 @@ class Owner (BaseModel):
     correo: str
     genero: str
     contrasennia: str
+    agente_idAgente: int
+    cedula : str
+    celular : str

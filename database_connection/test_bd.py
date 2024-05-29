@@ -1,7 +1,8 @@
 import random
 from fastapi import HTTPException, status
 import mysql.connector
-from mysql.connector import pooling
+
+from mysql.connector import pooling, Error
 
 config = {'user': 'JUANFER',
           'host': 'project1.mysql.database.azure.com',
