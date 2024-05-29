@@ -27,7 +27,7 @@ async def login(mail: str, password : str):
 
 
 
-@agentRouter.get("/getAgentMaintenances/{id}", status_code=status.HTTP_200_OK)
+@agentRouter.get("/getAgentMaintenances/{propertyId}", status_code=status.HTTP_200_OK)
 async def maintenanceAgents(propertyId: int):
     agents = agents_schema_bool(dbConnection.obtener_agentes_mantenimiento_acceso_a_propiedad(propertyId))
     return JSONResponse(content=agents)
