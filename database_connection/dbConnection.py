@@ -17,8 +17,8 @@ class ConnectionDB:
         }
         self.conn = None  # Mantén la conexión abierta en la instancia
         self.pool = pooling.MySQLConnectionPool(pool_name="mypool",
-                                           pool_size=5,
-                                           **dbconfig)
+                                                pool_size=5,
+                                                **dbconfig)
 
     def executeSQL(self, consulta_sql, variables_adicionales=None):
         connection = self.pool.get_connection()
@@ -42,7 +42,6 @@ class ConnectionDB:
             cursor.close()
             connection.close()
 
-
     # TODO: AGENTE (Siempre están quemados)
     def obtener_agente_por_id(self, idAgente: int):
         query = "SELECT * FROM AGENTE a WHERE a.idAgente = %s;"
@@ -57,17 +56,19 @@ class ConnectionDB:
         if not self.existe_propiedad_con_id(idPropiedad):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Property with this id was not found")
         else:
-            query = "SELECT * FROM AGENTE WHERE tipo = 'mantenimiento'"
-            agentes = self.executeSQL(query)
-            agentes_list = []
-            for agente in agentes:
-                agente_lista = list(agente)
-                if self.existe_acceso(idPropiedad, agente[0]):
-                    agente_lista.append(True)
-                else:
-                    agente_lista.append(False)
-                agentes_list.append(agente_lista)
-            print(agentes_list)
+            query_1 = ("SELECT DISTINCT ag.* FROM agente ag "
+                       "JOIN acceso ac ON ag.idAgente = ac.Agente_idAgente "
+                       "WHERE ag.tipo = 'mantenimiento' AND ac.Propiedad_idPropiedad = %s;")
+            agentes_1 = self.executeSQL(query_1, (idPropiedad,))
+
+            query_2 = ("SELECT DISTINCT ag.* FROM agente ag "
+                       "LEFT JOIN acceso ac ON ag.idAgente = ac.Agente_idAgente "
+                       "WHERE ag.tipo = 'mantenimiento' AND (ac.Propiedad_idPropiedad != %s OR ac.Propiedad_idPropiedad IS NULL);")
+            agentes_2 = self.executeSQL(query_2, (idPropiedad,))
+
+            # Combinar y transformar resultados utilizando list comprehensions
+            agentes_list = [list(agente) + [True] for agente in agentes_1] + [list(agente) + [False] for agente in
+                                                                              agentes_2]
             return agentes_list
 
     # FIXME
@@ -146,14 +147,14 @@ class ConnectionDB:
 
     # FIXME
     def agregar_propietario(self, nombre: str, correo: str, genero: str, contrasennia: str,
-                            agente_idAgente:int, cedula: int):
+                            agente_idAgente: int, cedula: int):
         if self.existe_propietario_con_correo(correo):
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                                 detail="You cannot post an OWNER  with an existing email")
         else:
             query = "INSERT INTO `keynova`.`propietario` (`nombre`,`correo`,`genero`, `contrasennia`,`agente_idAgente`,`cedula`,`celular`) " \
                     "VALUES (%s,%s,%s,%s,%s,%s,%s);"
-            variables = (nombre, correo, genero, contrasennia,agente_idAgente,cedula)
+            variables = (nombre, correo, genero, contrasennia, agente_idAgente, cedula)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propietario ORDER BY idPropietario DESC LIMIT 1;"
             return self.executeSQL(query)[0]
@@ -531,6 +532,7 @@ class ConnectionDB:
                 return False
         except Exception:
             return False
+
     # TODO: INVENTARIO
     # FIXME
     def obtener_inventario_por_id_propiedad(self, Propiedad_idPropiedad):
@@ -559,5 +561,3 @@ class ConnectionDB:
             return inventario
 
 
-c = ConnectionDB()
-print(c.obtener_propiedad_por_id(594))
