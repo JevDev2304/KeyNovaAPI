@@ -422,7 +422,6 @@ class ConnectionDB:
         try:
             query = "SELECT * FROM MUEBLE m WHERE m.idMueble = %s;"
             mueble = self.executeSQL(query, (idMueble,))
-            print(mueble)
             if len(mueble) > 0:
                 return True
             else:
@@ -559,10 +558,3 @@ class ConnectionDB:
                     habitacion["muebles"].append(mueble)
                 inventario["habitaciones"].append(habitacion)
             return inventario
-
-
-c = ConnectionDB()
-ts = time.time()
-print(c.obtener_habitaciones_por_id_propiedad(594))
-tf = time.time()
-print(tf - ts)
