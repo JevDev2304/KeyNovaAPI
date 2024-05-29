@@ -561,3 +561,5 @@ class ConnectionDB:
             return inventario
 
 
+c = ConnectionDB()
+print(c.obtener_agentes_mantenimiento_acceso_a_propiedad(594))
