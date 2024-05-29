@@ -29,19 +29,21 @@ class ConnectionDB:
 
     def executeSQL(self, consulta_sql, variables_adicionales=None):
         cursor = self.conn.cursor()
-        # Agregar la propiedad y obtener el id de la propiedad recién agregada
-        cursor.execute(consulta_sql, variables_adicionales)
+        try:
+            # Agregar la propiedad y obtener el id de la propiedad recién agregada
+            cursor.execute(consulta_sql, variables_adicionales)
 
-        if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
-                "UPDATE") or consulta_sql.strip().upper().startswith(
-            "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
-            self.conn.commit()
+            if consulta_sql.strip().upper().startswith("INSERT") or consulta_sql.strip().upper().startswith(
+                    "UPDATE") or consulta_sql.strip().upper().startswith(
+                "DELETE") or consulta_sql.strip().upper().startswith("CREATE"):
+                self.conn.commit()
+                return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
+            result = cursor.fetchall()
+            return result
+        except Exception as e:
+            raise e
+        finally:
             cursor.close()
-            return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
-        result = cursor.fetchall()
-        cursor.close()
-        return result
-
 
     # TODO: AGENTE (Siempre están quemados)
     def obtener_agente_por_id(self, idAgente: int):
@@ -146,14 +148,14 @@ class ConnectionDB:
 
     # FIXME
     def agregar_propietario(self, nombre: str, correo: str, genero: str, contrasennia: str,
-                            agente_idAgente:int, cedula: int):
+                            agente_idAgente: int, cedula: int):
         if self.existe_propietario_con_correo(correo):
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                                 detail="You cannot post an OWNER  with an existing email")
         else:
             query = "INSERT INTO `keynova`.`propietario` (`nombre`,`correo`,`genero`, `contrasennia`,`agente_idAgente`,`cedula`,`celular`) " \
                     "VALUES (%s,%s,%s,%s,%s,%s,%s);"
-            variables = (nombre, correo, genero, contrasennia,agente_idAgente,cedula)
+            variables = (nombre, correo, genero, contrasennia, agente_idAgente, cedula)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propietario ORDER BY idPropietario DESC LIMIT 1;"
             return self.executeSQL(query)[0]
@@ -529,6 +531,7 @@ class ConnectionDB:
                 return False
         except Exception:
             return False
+
     # TODO: INVENTARIO
     # FIXME
     def obtener_inventario_por_id_propiedad(self, Propiedad_idPropiedad):
