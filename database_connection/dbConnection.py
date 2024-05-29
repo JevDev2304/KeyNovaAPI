@@ -61,9 +61,9 @@ class ConnectionDB:
                        "WHERE ag.tipo = 'mantenimiento' AND ac.Propiedad_idPropiedad = %s;")
             agentes_1 = self.executeSQL(query_1, (idPropiedad,))
 
-            query_2 = ("SELECT DISTINCT ag.* FROM agente ag "
-                       "LEFT JOIN acceso ac ON ag.idAgente = ac.Agente_idAgente "
-                       "WHERE ag.tipo = 'mantenimiento' AND (ac.Propiedad_idPropiedad != %s OR ac.Propiedad_idPropiedad IS NULL);")
+            query_2 = ("SELECT DISTINCT ag.* FROM agente ag LEFT JOIN acceso ac ON ag.idAgente = ac.Agente_idAgente "
+                       "WHERE ag.tipo = 'mantenimiento' AND (ac.Propiedad_idPropiedad != %s "
+                       "OR ac.Propiedad_idPropiedad IS NULL);")
             agentes_2 = self.executeSQL(query_2, (idPropiedad,))
 
             # Combinar y transformar resultados utilizando list comprehensions
@@ -339,7 +339,7 @@ class ConnectionDB:
         if not self.existe_agente_con_id(idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
-            query = ("select distinct pr.idPropietario, pr.nombre, pr.correo, pr.genero, pr.contrasennia from "
+            query = ("select distinct pr.* from "
                      "propietario pr join (select Propietario_idPropietario from propiedad p join (select * from "
                      "agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg on "
                      "p.idPropiedad = acg.Propiedad_idPropiedad) aca on pr.idPropietario = "
@@ -562,4 +562,7 @@ class ConnectionDB:
 
 
 c = ConnectionDB()
-print(c.obtener_agentes_mantenimiento_acceso_a_propiedad(594))
+ts = time.time()
+print(c.obtener_habitaciones_por_id_propiedad(594))
+tf = time.time()
+print(tf - ts)
