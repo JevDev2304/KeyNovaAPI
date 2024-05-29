@@ -34,6 +34,7 @@ class ConnectionDB:
 
                 return cursor.lastrowid if consulta_sql.strip().upper().startswith("INSERT") else None
             result = cursor.fetchall()
+
             return result
         except Exception as e:
             raise e
@@ -307,7 +308,8 @@ class ConnectionDB:
             return False
 
     def obtener_propiedades_por_id_agente(self, idAgente):
-        cursor = self.conn.cursor()
+        connection = self.pool.get_connection()
+        cursor = connection.cursor()
         try:
             query_check_agent = "SELECT COUNT(*) FROM agente WHERE idAgente = %s;"
             cursor.execute(query_check_agent, (idAgente,))
@@ -329,6 +331,7 @@ class ConnectionDB:
             raise HTTPException(status_code=500, detail=str(e))
         finally:
             cursor.close()
+            connection.close()
 
     # FIXME
     def obtener_propietarios_por_id_agente(self, idAgente):
@@ -554,6 +557,7 @@ class ConnectionDB:
                     habitacion["muebles"].append(mueble)
                 inventario["habitaciones"].append(habitacion)
             return inventario
+
 
 c = ConnectionDB()
 print(c.obtener_propiedad_por_id(594))
