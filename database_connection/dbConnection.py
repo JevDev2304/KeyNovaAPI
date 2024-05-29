@@ -4,16 +4,8 @@ import time
 from fastapi import HTTPException, status
 from mysql.connector import pooling, Error
 
-config = {'user': 'JUANFER',
-          'host': 'project1.mysql.database.azure.com',
-          'password': 'Duko0505',
-          'database': 'keynova',
-          'port': 3306,  # Puerto predeterminado de MySQL
-          'raise_on_warnings': True}  # Para que se generen excepciones en caso de advertencias
-
 
 class ConnectionDB:
-
 
     def __init__(self):
         dbconfig = {
@@ -159,8 +151,8 @@ class ConnectionDB:
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                                 detail="You cannot post an OWNER  with an existing email")
         else:
-            query = "INSERT INTO `keynova`.`propietario` (`nombre`,`correo`,`genero`, `contrasennia`,`agente_idAgente`,`cedula`) " \
-                    "VALUES (%s,%s,%s,%s,%s,%s);"
+            query = "INSERT INTO `keynova`.`propietario` (`nombre`,`correo`,`genero`, `contrasennia`,`agente_idAgente`,`cedula`,`celular`) " \
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s);"
             variables = (nombre, correo, genero, contrasennia,agente_idAgente,cedula)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propietario ORDER BY idPropietario DESC LIMIT 1;"
