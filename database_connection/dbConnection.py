@@ -62,7 +62,7 @@ class ConnectionDB:
             agentes_1 = self.executeSQL(query_1, (idPropiedad,))
 
             query_2 = ("SELECT DISTINCT ag.* FROM agente ag WHERE ag.tipo = 'mantenimiento' AND NOT EXISTS (SELECT 1 "
-                       "FROM acceso ac WHERE ac.Agente_idAgente = ag.idAgente AND ac.Propiedad_idPropiedad = 595);")
+                       "FROM acceso ac WHERE ac.Agente_idAgente = ag.idAgente AND ac.Propiedad_idPropiedad = %s);")
             agentes_2 = self.executeSQL(query_2, (idPropiedad,))
 
             # Combinar y transformar resultados utilizando list comprehensions
