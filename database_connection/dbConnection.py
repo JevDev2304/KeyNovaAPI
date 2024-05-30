@@ -147,14 +147,14 @@ class ConnectionDB:
 
     # FIXME
     def agregar_propietario(self, nombre: str, correo: str, genero: str, contrasennia: str,
-                            agente_idAgente: int, cedula: int):
+                            agente_idAgente: int, cedula: int, celular: int):
         if self.existe_propietario_con_correo(correo):
             raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                                 detail="You cannot post an OWNER  with an existing email")
         else:
             query = "INSERT INTO `keynova`.`propietario` (`nombre`,`correo`,`genero`, `contrasennia`,`agente_idAgente`,`cedula`,`celular`) " \
                     "VALUES (%s,%s,%s,%s,%s,%s,%s);"
-            variables = (nombre, correo, genero, contrasennia, agente_idAgente, cedula)
+            variables = (nombre, correo, genero, contrasennia, agente_idAgente, cedula, celular)
             self.executeSQL(query, variables)
             query = "SELECT * FROM propietario ORDER BY idPropietario DESC LIMIT 1;"
             return self.executeSQL(query)[0]
@@ -286,6 +286,10 @@ class ConnectionDB:
             property = self._agregar_propiedad(Propietario_idPropietario, direccion, imagen, firmado)
             self.agregar_acceso(property[0], idAgente)
             return property
+
+    def firmar_propiedad(self, idPropiedad):
+        query = "UPDATE `keynova`.`propiedad` SET `firmado` = 1 WHERE `idPropiedad` = %s;"
+        self.executeSQL(query, (idPropiedad,))
 
     # FIXME
     def obtener_propiedades_por_id_propietario(self, Propietario_idPropietario):

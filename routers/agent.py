@@ -38,14 +38,14 @@ async def sendOTP(id_agent: int):
     agent = agent_schema(dbConnection.obtener_agente_por_id(id_agent))
     num=temporal_password(id_agent)
     sendmail(agent["correo"],"OTP VALIDATION", OTPHTML(num))
-    return JSONResponse(content=num)
+    return JSONResponse(content={"message":"OTP SENT"})
 
 
 @agentRouter.post("/signingInventory")
 async def inkInventory(id_agent: int, num: int, id_propiedad :int):
     if validate_temporal_password(id_agent, num):
         send_inventory_mail_owner(id_propiedad)
-        temporal_password(id_agent)
+        dbConnection.firmar_propiedad(id_propiedad)
         return JSONResponse(content={"message":"INVENTORY SENT"})
     else:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Incorrect OTP PASSWORD")
