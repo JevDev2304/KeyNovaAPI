@@ -109,7 +109,7 @@ class ConnectionDB:
         except Exception:
             return False
 
-    #FIXME
+    # FIXME
     def crear_clave_temporal(self, idAgente: int):
         self.obtener_agente_por_id(idAgente)
         query = "UPDATE `keynova`.`agente` SET `clave_temporal` = %s WHERE `idAgente` = %s;"
@@ -266,26 +266,30 @@ class ConnectionDB:
         self.executeSQL(query, (idPropiedad,))
 
     # FIXME
-    def _agregar_propiedad(self, Propietario_idPropietario: int, direccion: str, imagen: str, firmado: int):
-        if not self.existe_propietario_con_id(Propietario_idPropietario):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
-        else:
-            query = "INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`,`direccion`,`imagen`, `firmado`) " \
-                    "VALUES (%s,%s,%s,%s);"
-            variables = (int(Propietario_idPropietario), direccion, imagen, firmado)
-            self.executeSQL(query, variables)
-            query = "SELECT * FROM propiedad ORDER BY idPropiedad DESC LIMIT 1;"
-            return self.executeSQL(query)[0]
-
-    # FIXME
     def agregar_propiedad_con_agente(self, idAgente: int, Propietario_idPropietario: int, direccion: str, imagen: str,
                                      firmado: int = 0):
-        if not self.existe_propietario_con_id(Propietario_idPropietario):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Owner with this id was not found")
-        else:
-            property = self._agregar_propiedad(Propietario_idPropietario, direccion, imagen, firmado)
-            self.agregar_acceso(property[0], idAgente)
+        connection = self.pool.get_connection()
+        cursor = connection.cursor()
+        try:
+            query = "INSERT INTO `keynova`.`propiedad` (`Propietario_idPropietario`,`direccion`,`imagen`,`firmado`) " \
+                    "VALUES (%s,%s,%s,%s);"
+            variables = (int(Propietario_idPropietario), direccion, imagen, firmado)
+            cursor.execute(query, variables)
+            query = "SELECT * FROM PROPIEDAD p ORDER BY idPropiedad DESC LIMIT 1;"
+            cursor.execute(query)
+            property = cursor.fetchall()[0]
+            query = "INSERT INTO `keynova`.`acceso` (`Propiedad_idPropiedad`,`Agente_idAgente`) " \
+                    "VALUES (%s,%s);"
+            variables = (property[0], idAgente)
+            cursor.execute(query, variables)
+            connection.commit()
             return property
+        except Error as e:
+            print(f"Error: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            cursor.close()
+            connection.close()
 
     def firmar_propiedad(self, idPropiedad):
         query = "UPDATE `keynova`.`propiedad` SET `firmado` = 1 WHERE `idPropiedad` = %s;"
