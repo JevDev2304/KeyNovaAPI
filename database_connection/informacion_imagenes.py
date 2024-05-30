@@ -24,6 +24,9 @@
 
 # 38937ae9-591b-4782-88da-62f820c011e7.jpg LICUADORA
 
+# FOTOS DE PERFIL.
+# 3882d8af-37cf-4d70-bb55-b85dce26f845.jpg FOTO 1
+# ccf9baca-316f-40a6-b6bc-5b06f12c35eb.jpg FOTO 2
 
 import time
 import mysql.connector
