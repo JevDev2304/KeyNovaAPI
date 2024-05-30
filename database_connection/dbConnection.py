@@ -343,11 +343,8 @@ class ConnectionDB:
         if not self.existe_agente_con_id(idAgente):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent with this id was not found")
         else:
-            query = ("select distinct pr.* from "
-                     "propietario pr join (select Propietario_idPropietario from propiedad p join (select * from "
-                     "agente ag JOIN acceso ac on ag.idAgente = ac.Agente_idAgente where ag.idAgente = %s) acg on "
-                     "p.idPropiedad = acg.Propiedad_idPropiedad) aca on pr.idPropietario = "
-                     "aca.Propietario_idPropietario;")
+            query = ("select distinct p.* from propietario p join agente a on p.agente_idAgente = a.idAgente "
+                     "where a.idAgente = %s;")
             variables = (idAgente,)
             return self.executeSQL(query, variables)
 
