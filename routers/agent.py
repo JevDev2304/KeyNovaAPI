@@ -38,7 +38,7 @@ async def sendOTP(id_agent: int):
     agent = agent_schema(dbConnection.obtener_agente_por_id(id_agent))
     num=temporal_password(id_agent)
     sendmail(agent["correo"],"OTP VALIDATION", OTPHTML(num))
-    return JSONResponse(content={"message":"OTP SENT"})
+    return JSONResponse(content=num)
 
 
 @agentRouter.post("/signingInventory")
